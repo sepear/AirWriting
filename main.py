@@ -76,8 +76,9 @@ class AplicacionGUI():
             frame = cv2.flip(frame, 1)
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             
-            main(cv2image) # Ejecutamos el método main
-            
+            #main(cv2image) # Ejecutamos el método main
+            main(frame)#CAMBIO HECHO POR SERGIO, COMO LUEGO SE LE HACEN COSAS INTERMEDIAS, EMJOR PASARLO EN BGR Y LUEGO YA AL FINAL SE PASA A RGBA
+
             img = Image.fromarray(cv2image)
             imgtk = ImageTk.PhotoImage(image=img)
             video.imgtk = imgtk
