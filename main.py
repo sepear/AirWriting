@@ -45,31 +45,31 @@ class AplicacionGUI():
 
         imagenGuardar = ImageTk.PhotoImage(Image.open("images/save.png")) # Cargamos el icono de guardar
         bGuardar = tk.Button(self.root, text='Guardar',image=imagenGuardar,command=fguardar) # Creamos un botón con ola imagen anterior y que ejecutará la función correspondiente
-        bGuardar.place(x=1000, y=460)
+        bGuardar.place(x=1000, y=460+350)
 
         imagenReset = Image.open("images/reset.png")
         imagenReset = imagenReset.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenResetRedimensionada = ImageTk.PhotoImage(imagenReset)
         breset = tk.Button(self.root, text='Restart',image=imagenResetRedimensionada ,command=freset)
-        breset.place(x=1100,y=460)
+        breset.place(x=1100,y=460+350)
 
         texto2 = tk.Label(self.root, text="Imagen dibujada")
-        texto2.place(x=1015,y=225)
+        texto2.place(x=1015,y=20)
         
         render = ImageTk.PhotoImage(Image.open("images/placeholder.png")) # Cargamos una imagen de placeholder hasta que se obtenga la real  
         placeholder = tk.Label(self.root, image=render)
         placeholder.image = render
-        placeholder.place(x=1000, y=250)
+        placeholder.place(x=1000, y=50)
         
         prediccion = tk.StringVar(self.root,value="-")
         texto3 = tk.Label(self.root, textvariable=prediccion)
-        texto3.place(x=1000,y=400)
+        texto3.place(x=1000,y=400+350)
         
         imagenSkinFilter = Image.open("images/config.png")
         imagenSkinFilter = imagenSkinFilter.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenSkinFilterRedimensionada = ImageTk.PhotoImage(imagenSkinFilter)
         bclose = tk.Button(self.root, text='Configuracion',image=imagenSkinFilterRedimensionada ,command=self.cerrarVentana)
-        bclose.place(x=1200,y=560)
+        bclose.place(x=1200,y=560+350)
         
         def show_frame(): # Esta función nos permite convertir la entrada de la webcam en imágenes válidas para tkinter
             _, frame = cam.read()
@@ -278,8 +278,20 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     # getSkinFilteredImage(frame) con esta funcion nos devolverá el filtro aplicado al fotograma pasado
     # NOTA IMPORTANTE : Para debuguear la imagen que esteis trabajando, usar la funcion setimagenreconocida, os la mostrará por pantalla aunque rompiendo la interfaz, hasta nuevo aviso será así
     print("Fotograma")
+    #a = media(fotograma)
+    #b = skinfilter(a)
+    #recortar(fotograma)
+    #prediccion(fotograma)
+    skinfiltered= getSkinFilteredImage(fotograma)#ESTO HAY QUE ARREGLARLO PORQUE NO SALE COMO DEBERÍA
     #setPrediccionText("-") # Ejemplo de como cambiar el texto de la predicción
-    setImagenReconocida(np.zeros((40,40))*150) # Ejemplo de como cambiar la imagen de la predicción
+    #setImagenReconocida(np.zeros((40,40))*150) # Ejemplo de como cambiar la imagen de la predicción
+    
+    
+    skinfiltered = cv2.cvtColor(skinfiltered, cv2.COLOR_BGR2RGBA)
+   
+    setImagenReconocida(skinfiltered)
+
+
 
 def launchWindow(skinfilter=False):
     if(skinfilter):
