@@ -278,7 +278,7 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     # El parámetro fotograma es, un fotograma xD hay que aplicar toda la lógica y funciones desde aquí
     # getSkinFilteredImage(frame) con esta funcion nos devolverá el filtro aplicado al fotograma pasado
     # NOTA IMPORTANTE : Para debuguear la imagen que esteis trabajando, usar la funcion setimagenreconocida, os la mostrará por pantalla aunque rompiendo la interfaz, hasta nuevo aviso será así
-    print("Fotograma")
+    #print("Fotograma")
     #a = media(fotograma)
     #b = skinfilter(a)
     #recortar(fotograma)
@@ -286,11 +286,13 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     skinfiltered= getSkinFilteredImage(fotograma)#ESTO HAY QUE ARREGLARLO PORQUE NO SALE COMO DEBERÍA
     #setPrediccionText("-") # Ejemplo de como cambiar el texto de la predicción
     #setImagenReconocida(np.zeros((40,40))*150) # Ejemplo de como cambiar la imagen de la predicción
+    filtro_media = cv2.blur(skinfiltered,(5,5))
     
-    
-    skinfiltered = cv2.cvtColor(skinfiltered, cv2.COLOR_BGR2RGBA)
+    imagen_procesada = cv2.cvtColor(filtro_media, cv2.COLOR_BGR2RGBA)
+
+    print(imagen_procesada)
    
-    setImagenReconocida(skinfiltered)
+    setImagenReconocida(imagen_procesada)
 
 
 
