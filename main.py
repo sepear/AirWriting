@@ -286,13 +286,82 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     skinfiltered= getSkinFilteredImage(fotograma)#ESTO HAY QUE ARREGLARLO PORQUE NO SALE COMO DEBERÍA
     #setPrediccionText("-") # Ejemplo de como cambiar el texto de la predicción
     #setImagenReconocida(np.zeros((40,40))*150) # Ejemplo de como cambiar la imagen de la predicción
-    filtro_media = cv2.blur(skinfiltered,(5,5))
     
-    imagen_procesada = cv2.cvtColor(filtro_media, cv2.COLOR_BGR2RGBA)
+    ############## Suavizado ###############
+    #filtro_media_size = getFMSize();  #Función para que alberto haga la función y la enlace con los "botoncitos" los más comunes son (3,3) y (5,5)
+    
+    filtro_media = cv2.blur(skinfiltered,(3,3))   # (3,3) sustituir por "filtro_media_size" cuando la función esté hecha
+    
+    ############### Erosión #########################
+    
+    #erosion_kernel_size = getEKSize(); #Función para determinar el tamaño del kernel y alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
+    
+    erosion_kernel = np.ones((3,3), np.uint8)  # (3,3) sustituir por erosion_kernel_size cuando la función esté hecha)
+    
+    #iteraciones_erosion = getEIteraciones() #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones.
+    
+    erosion = cv2.erode(filtro_media, erosion_kernel, iterations = 1) # iterations = iteraciones cuando la función esté hecha 
+    
+    #Nota: iteraciones = 0 -> no hay erosión
+    
+    
+    ############### Dilatación ###################
+    
+    #dilation_kernel_size = getDKSize(); #Función para determinar el tamaño del kernel y Alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
+    
+    dilation_kernel = np.ones((3,3), np.uint8)  # (3,3) sustituir por dilation_kernel_size cuando la función esté hecha)
+    
+    #iteraciones_dilation = getDIteraciones() #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones.
+    
+    Dilation = cv2.erode(erosion, dilation_kernel, iterations = 1) # iterations = iteraciones cuando la función esté hecha 
+    
+    #Nota: iteraciones = 0 -> no hay Dilatación
+    
+    ########### Imagen ya procesada ###########################
+    
+    imagen_procesada = cv2.cvtColor(Dilation, cv2.COLOR_BGR2RGBA)
 
     print(imagen_procesada)
    
     setImagenReconocida(imagen_procesada)
+
+
+
+########### Funciones auxiliares procesamiento ##########
+#Función para que alberto haga la función y la enlace con los "botoncitos" los más comunes son (3,3) y (5,5)
+def getFMSize():
+    pass
+
+
+
+
+#Función para determinar el tamaño del kernel y alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
+def getEKSize():
+    pass
+
+
+
+#Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones en erosion.
+def getEIteraciones():
+    pass
+
+
+#Función para determinar el tamaño del kernel y Alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
+def getDKSize():
+    pass
+
+
+#Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones en dilatacion.
+def getDIteraciones():
+    pass
+
+
+
+
+
+
+
+
 
 
 
