@@ -70,7 +70,11 @@ class AplicacionGUI():
         imagenSkinFilterRedimensionada = ImageTk.PhotoImage(imagenSkinFilter)
         bclose = tk.Button(self.root, text='Configuracion',image=imagenSkinFilterRedimensionada ,command=self.cerrarVentana)
         bclose.place(x=1200,y=560+350)
-        
+        def on_closing(): # Función para cerrar Tkinter y soltar la cámara
+            print("closing")
+            cam.release()
+            self.root.destroy()
+        self.root.protocol("WM_DELETE_WINDOW", on_closing)
         def show_frame(): # Esta función nos permite convertir la entrada de la webcam en imágenes válidas para tkinter
             _, frame = cam.read()
             frame = cv2.flip(frame, 1)
@@ -178,7 +182,11 @@ class skinfilterGUI():
         imagenSkinFilterRedimensionada = ImageTk.PhotoImage(imagenSkinFilter)
         bclose = tk.Button(self.root, text='volver',image=imagenSkinFilterRedimensionada ,command=self.cerrarVentana)
         bclose.grid(row=10,column=2)
-        
+        def on_closing():# Función para cerrar Tkinter y soltar la cámara
+            print("closing")
+            cam.release()
+            self.root.destroy()
+        self.root.protocol("WM_DELETE_WINDOW", on_closing)
         def show_frame(): # Se ejecuta una vez por frame
             self.frameCounter += 1
             if cam.get(cv2.CAP_PROP_FRAME_COUNT) ==self.frameCounter:
@@ -263,6 +271,9 @@ def setPrediccionText(text): # Esta función actualiza la variable global para q
 def setImagenReconocida(array): # Esta función actualiza la variable global para que cambie en Tkinter. Recibe un array de numpy
     global imagenReconocidaImage
     imagenReconocidaImage = array
+    
+
+
 
 ####################################################################################################################################
 
