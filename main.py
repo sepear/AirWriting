@@ -140,6 +140,12 @@ class skinfilterGUI():
         global v_min_global 
         global v_max_global 
         
+        global FMSize
+        global EKSize
+        global EIteraciones
+        global DKSize
+        global DIteraciones
+        
         # Definimos todos los sliders y los seteamos con el valor de las variables globales por defecto
         self.h_min = tk.Scale(self.root, from_=0, to=179, orient=tk.HORIZONTAL)
         self.h_min.set(h_min_global)
@@ -177,11 +183,45 @@ class skinfilterGUI():
         label_6.grid(row=13, column=0)
         self.v_max.grid(row=13, column=1)
         
+        #botones
+        self.FMSize_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.FMSize_B.set(FMSize[0])
+        label_7 = tk.Label(self.root, text="FMSize")
+        label_7.grid(row=15, column=0)
+        self.FMSize_B.grid(row=15, column=1)
+
+        self.EKSize_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.EKSize_B.set(EKSize[0])
+        label_8 = tk.Label(self.root, text="EKSize")
+        label_8.grid(row=16, column=0)
+        self.EKSize_B.grid(row=16, column=1)
+
+        self.EIteraciones_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.EIteraciones_B.set(EIteraciones)
+        label_9 = tk.Label(self.root, text="EIteraciones")
+        label_9.grid(row=17, column=0)
+        self.EIteraciones_B.grid(row=17, column=1)
+
+        self.DKSize_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.DKSize_B.set(DKSize[0])
+        label_10 = tk.Label(self.root, text="DKSize")
+        label_10.grid(row=18, column=0)
+        self.DKSize_B.grid(row=18, column=1)
+
+        self.DIteraciones_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.DIteraciones_B.set(DIteraciones)
+        label_11 = tk.Label(self.root, text="DIteraciones")
+        label_11.grid(row=19, column=0)
+        self.DIteraciones_B.grid(row=19, column=1)        
+        
+        
         imagenSkinFilter = Image.open("images/back.png") # Botón para volver
         imagenSkinFilter = imagenSkinFilter.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenSkinFilterRedimensionada = ImageTk.PhotoImage(imagenSkinFilter)
         bclose = tk.Button(self.root, text='volver',image=imagenSkinFilterRedimensionada ,command=self.cerrarVentana)
         bclose.grid(row=10,column=2)
+
+        
         def on_closing():# Función para cerrar Tkinter y soltar la cámara
             print("closing")
             cam.release()
@@ -214,6 +254,19 @@ class skinfilterGUI():
             s_max_global = self.s_max.get()
             v_min_global = self.v_min.get()
             v_max_global = self.v_max.get()
+            
+            global FMSize
+            global EKSize
+            global EIteraciones
+            global DKSize
+            global DIteraciones
+            
+            FMSize = (self.FMSize_B.get(),self.FMSize_B.get())
+            EKSize = (self.EKSize_B.get(),self.EKSize_B.get())
+            EIteraciones = self.EIteraciones_B.get() 
+            DKSize = (self.DKSize_B.get(),self.DKSize_B.get())
+            DIteraciones = self.DIteraciones_B.get()
+        
   
             lower = np.array([h_min_global, s_min_global, v_min_global]) # Calculamos la máscara 
             upper = np.array([h_max_global, s_max_global, v_max_global])
@@ -341,30 +394,24 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
 ########### Funciones auxiliares procesamiento ##########
 #Función para que alberto haga la función y la enlace con los "botoncitos" los más comunes son (3,3) y (5,5)
 def getFMSize():
-    pass
-
-
-
+    return FMSize
 
 #Función para determinar el tamaño del kernel y alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
 def getEKSize():
-    pass
-
-
+    return EKSize
 
 #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones en erosion.
 def getEIteraciones():
-    pass
+    return EIteraciones
 
 
 #Función para determinar el tamaño del kernel y Alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
 def getDKSize():
-    pass
-
+    return DKSize
 
 #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones en dilatacion.
 def getDIteraciones():
-    pass
+    return DIteraciones
 
 
 
