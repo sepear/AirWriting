@@ -118,10 +118,6 @@ class skinfilterGUI():
         cam.set(cv2.CAP_PROP_FRAME_WIDTH, 320) # Width
         cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 240) # Height
     
-        
-       # self.cap = cv2.VideoCapture(0) # Definimos los parámetros de captura de video
-       # self.cap.set(3, 320)
-       # self.cap.set(4, 240)
         self.frameCounter = 0
         
         video1 = tk.Label(self.root) # AÑadimos el video1 a la raiz
@@ -132,6 +128,15 @@ class skinfilterGUI():
         
         video3 = tk.Label(self.root) # AÑadimos el video3 a la raiz
         video3.grid(row=0,column=2)
+        
+        video4 = tk.Label(self.root) # AÑadimos el video3 a la raiz
+        video4.grid(row=1,column=0)
+        
+        video5 = tk.Label(self.root) # AÑadimos el video3 a la raiz
+        video5.grid(row=1,column=1)
+        
+        video6 = tk.Label(self.root) # AÑadimos el video3 a la raiz
+        video6.grid(row=1,column=2)
 
         global h_min_global  # Nos traemos las variables globales
         global h_max_global 
@@ -183,8 +188,8 @@ class skinfilterGUI():
         label_6.grid(row=13, column=0)
         self.v_max.grid(row=13, column=1)
         
-        #botones
-        self.FMSize_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        #sliders erosion dilatacion y blur
+        self.FMSize_B = tk.Scale(self.root, from_=1, to=255, orient=tk.HORIZONTAL)
         self.FMSize_B.set(FMSize[0])
         label_7 = tk.Label(self.root, text="FMSize")
         label_7.grid(row=15, column=0)
@@ -214,14 +219,12 @@ class skinfilterGUI():
         label_11.grid(row=19, column=0)
         self.DIteraciones_B.grid(row=19, column=1)        
         
-        
         imagenSkinFilter = Image.open("images/back.png") # Botón para volver
         imagenSkinFilter = imagenSkinFilter.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenSkinFilterRedimensionada = ImageTk.PhotoImage(imagenSkinFilter)
         bclose = tk.Button(self.root, text='volver',image=imagenSkinFilterRedimensionada ,command=self.cerrarVentana)
         bclose.grid(row=10,column=2)
 
-        
         def on_closing():# Función para cerrar Tkinter y soltar la cámara
             print("closing")
             cam.release()
@@ -293,6 +296,29 @@ class skinfilterGUI():
             video3.imgtk3 = imgtk3
             video3.configure(image=imgtk3)
             
+            filtro_media = cv2.blur(mask,getFMSize())  
+            filtro_media = cv2.cvtColor(filtro_media, cv2.COLOR_BGR2RGBA)
+            img4 = Image.fromarray(filtro_media)
+            imgtk4 = ImageTk.PhotoImage(image=img4)
+            video4.imgtk4 = imgtk4
+            video4.configure(image=imgtk4)
+            
+            erosion_kernel = np.ones(getEKSize(), np.uint8)
+            filtro_erosion = cv2.erode(filtro_media, erosion_kernel, iterations = getEIteraciones())            
+            filtro_erosion = cv2.cvtColor(filtro_erosion, cv2.COLOR_BGR2RGBA)
+            img5 = Image.fromarray(filtro_erosion)
+            imgtk5 = ImageTk.PhotoImage(image=img5)
+            video5.imgtk5 = imgtk5
+            video5.configure(image=imgtk5)
+
+            dilation_kernel = np.ones(getDKSize(), np.uint8)
+            filtro_dilatacion = cv2.erode(filtro_erosion, dilation_kernel, iterations = getDIteraciones()) 
+            filtro_dilatacion = cv2.cvtColor(filtro_dilatacion, cv2.COLOR_BGR2RGBA)
+            img6 = Image.fromarray(filtro_dilatacion)
+            imgtk6 = ImageTk.PhotoImage(image=img6)
+            video6.imgtk6 = imgtk6
+            video6.configure(image=imgtk6)
+            
             self.root.after(10, show_frame) # programamos el siguiente fotograma
             
         show_frame() # Ejecutamos un frame
@@ -326,8 +352,6 @@ def setImagenReconocida(array): # Esta función actualiza la variable global par
     imagenReconocidaImage = array
     
 
-
-
 ####################################################################################################################################
 
 # A partir de aquí lo que os interesa y podeis tocar
@@ -354,17 +378,17 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     ############## Suavizado ###############
     #filtro_media_size = getFMSize();  #Función para que alberto haga la función y la enlace con los "botoncitos" los más comunes son (3,3) y (5,5)
     
-    filtro_media = cv2.blur(skinfiltered,(3,3))   # (3,3) sustituir por "filtro_media_size" cuando la función esté hecha
+    filtro_media = cv2.blur(skinfiltered,getFMSize())   # (3,3) sustituir por "filtro_media_size" cuando la función esté hecha
     
     ############### Erosión #########################
     
     #erosion_kernel_size = getEKSize(); #Función para determinar el tamaño del kernel y alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
     
-    erosion_kernel = np.ones((3,3), np.uint8)  # (3,3) sustituir por erosion_kernel_size cuando la función esté hecha)
+    erosion_kernel = np.ones(getEKSize(), np.uint8)  # (3,3) sustituir por erosion_kernel_size cuando la función esté hecha)
     
     #iteraciones_erosion = getEIteraciones() #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones.
     
-    erosion = cv2.erode(filtro_media, erosion_kernel, iterations = 1) # iterations = iteraciones cuando la función esté hecha 
+    erosion = cv2.erode(filtro_media, erosion_kernel, iterations = getEIteraciones()) # iterations = iteraciones cuando la función esté hecha 
     
     #Nota: iteraciones = 0 -> no hay erosión
     
@@ -373,11 +397,11 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     
     #dilation_kernel_size = getDKSize(); #Función para determinar el tamaño del kernel y Alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
     
-    dilation_kernel = np.ones((3,3), np.uint8)  # (3,3) sustituir por dilation_kernel_size cuando la función esté hecha)
+    dilation_kernel = np.ones(getDKSize(), np.uint8)  # (3,3) sustituir por dilation_kernel_size cuando la función esté hecha)
     
     #iteraciones_dilation = getDIteraciones() #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones.
     
-    Dilation = cv2.erode(erosion, dilation_kernel, iterations = 1) # iterations = iteraciones cuando la función esté hecha 
+    Dilation = cv2.erode(erosion, dilation_kernel, iterations = getDIteraciones()) # iterations = iteraciones cuando la función esté hecha 
     
     #Nota: iteraciones = 0 -> no hay Dilatación
     
@@ -385,7 +409,7 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     
     imagen_procesada = cv2.cvtColor(Dilation, cv2.COLOR_BGR2RGBA)
 
-    print(imagen_procesada)
+    #print(imagen_procesada)
    
     setImagenReconocida(imagen_procesada)
 
@@ -412,15 +436,6 @@ def getDKSize():
 #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones en dilatacion.
 def getDIteraciones():
     return DIteraciones
-
-
-
-
-
-
-
-
-
 
 
 def launchWindow(skinfilter=False):

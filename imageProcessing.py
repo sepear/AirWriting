@@ -16,11 +16,11 @@ s_max_global = 255 #
 v_min_global = 127   #
 v_max_global = 255 #
 
-FMSize = (0,0) # tupla de dos números iguales
-EKSize = (1,1) # idem
-EIteraciones = 11 # iter
-DKSize = (1,3) # tupla
-DIteraciones = 11 # iter
+FMSize = (3,3) # tupla de dos números iguales
+EKSize = (3,3) # idem
+EIteraciones = 1 # iter
+DKSize = (3,3) # tupla
+DIteraciones = 1 # iter
 
 
 cam = cv2.VideoCapture(0) # Captura de la webcam
