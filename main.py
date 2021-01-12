@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""# -*- coding: utf-8 -*-"""
 """
 Created on Wed Dec 23 12:09:12 2020
 
@@ -189,31 +189,31 @@ class skinfilterGUI():
         self.v_max.grid(row=13, column=1)
         
         #sliders erosion dilatacion y blur
-        self.FMSize_B = tk.Scale(self.root, from_=1, to=255, orient=tk.HORIZONTAL)
+        self.FMSize_B = tk.Scale(self.root, from_=1, to=20, orient=tk.HORIZONTAL)
         self.FMSize_B.set(FMSize[0])
         label_7 = tk.Label(self.root, text="FMSize")
         label_7.grid(row=15, column=0)
         self.FMSize_B.grid(row=15, column=1)
 
-        self.EKSize_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.EKSize_B = tk.Scale(self.root, from_=0, to=20, orient=tk.HORIZONTAL)
         self.EKSize_B.set(EKSize[0])
         label_8 = tk.Label(self.root, text="EKSize")
         label_8.grid(row=16, column=0)
         self.EKSize_B.grid(row=16, column=1)
 
-        self.EIteraciones_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.EIteraciones_B = tk.Scale(self.root, from_=0, to=20, orient=tk.HORIZONTAL)
         self.EIteraciones_B.set(EIteraciones)
         label_9 = tk.Label(self.root, text="EIteraciones")
         label_9.grid(row=17, column=0)
         self.EIteraciones_B.grid(row=17, column=1)
 
-        self.DKSize_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.DKSize_B = tk.Scale(self.root, from_=0, to=20, orient=tk.HORIZONTAL)
         self.DKSize_B.set(DKSize[0])
         label_10 = tk.Label(self.root, text="DKSize")
         label_10.grid(row=18, column=0)
         self.DKSize_B.grid(row=18, column=1)
 
-        self.DIteraciones_B = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.DIteraciones_B = tk.Scale(self.root, from_=0, to=20, orient=tk.HORIZONTAL)
         self.DIteraciones_B.set(DIteraciones)
         label_11 = tk.Label(self.root, text="DIteraciones")
         label_11.grid(row=19, column=0)
@@ -371,7 +371,7 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     #b = skinfilter(a)
     #recortar(fotograma)
     #prediccion(fotograma)
-    skinfiltered= getSkinFilteredImage(fotograma)#ESTO HAY QUE ARREGLARLO PORQUE NO SALE COMO DEBERÍA
+    skinfiltered = getSkinFilteredImage(fotograma)#ESTO HAY QUE ARREGLARLO PORQUE NO SALE COMO DEBERÍA
     #setPrediccionText("-") # Ejemplo de como cambiar el texto de la predicción
     #setImagenReconocida(np.zeros((40,40))*150) # Ejemplo de como cambiar la imagen de la predicción
     
@@ -406,11 +406,88 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     #Nota: iteraciones = 0 -> no hay Dilatación
     
     ########### Imagen ya procesada ###########################
-    
-    imagen_procesada = cv2.cvtColor(Dilation, cv2.COLOR_BGR2RGBA)
 
+    #https: // stackoverflow.com / questions / 44588279 / find - and -draw - the - largest - contour - in -opencv - on - a - specific - color - python
+
+
+
+    #OJO CAMBIO TEMPORAL DE SERGIO EN EL QUE ME SALTO LO QUE NO SEA HSV PARA TESTEAR
+    imgray = cv2.cvtColor(skinfiltered, cv2.COLOR_BGR2GRAY)
+    ret, thresh = cv2.threshold(imgray, 127, 255, 0)
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #Asumimos que la mano es el contorno más grande, ya que estará en primer plano
+
+    #AQUÍ PUEDE EXPLOTAR SI NO HAY VARIOS, MIRAR EL LEN O HACER TRY/EXECPTION
+    c = max(contours, key=cv2.contourArea)
+
+
+    #https: // www.pyimagesearch.com / 2016 / 02 / 01 / opencv - center - of - contour /
+    M = cv2.moments(c)#M es el centroide
+    cX = int(M["m10"] / M["m00"])#estas sus coordenadas
+    cY = int(M["m01"] / M["m00"])
+
+
+    x, y, w, h = cv2.boundingRect(c)
+
+    # draw the biggest contour (c) in green
+
+
+
+    imagen_procesada = cv2.cvtColor(imgray, cv2.COLOR_BGR2RGB)
+
+    cv2.circle(imagen_procesada, (cX, cY), 7, (255, 0, 0), -1)
+
+    cv2.rectangle(imagen_procesada, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    hand_hull = cv2.convexHull(c, False)#ponemos en false para que devuelva los indices de los puntos del contorno
+    hand_hull_coordinates = cv2.convexHull(c, True)#ponemos en true para que devuelva las coordenadas
+
+
+
+
+    #IMPORTANTE!!!!!!!!!!!!!!! ESTE ES EL PUNTO QUE VAMOS A PINTAR(ASUMIDO COMO PUNTA DE DEDO)
+    punto_mas_lejano = masLejano(hand_hull_coordinates, (cX, cY))
+
+    print("######################3")
+    print(hand_hull_coordinates)
+    print(f"len:{len(hand_hull_coordinates)}")
+    print(type(hand_hull_coordinates))
+    print(hand_hull_coordinates[0])
+    print(type(hand_hull_coordinates[0]))
+    print(hand_hull_coordinates[0][0][0])
+    print(type(hand_hull_coordinates[0][0][0]))
+    print("######################")
+    #https: // opencv - python - tutroals.readthedocs.io / en / latest / py_tutorials / py_imgproc / py_contours / py_contour_features / py_contour_features.html
+
+    #imagen_procesada[:] = 0
+    #cv2.drawContours(imagen_procesada, [c], contourIdx=0, color=(0, 255, 0))
+    #cv2.drawContours(imagen_procesada, [hand_hull], contourIdx=0, color=(255, 0, 0))
+    drawing = np.zeros((imagen_procesada.shape[0], imagen_procesada.shape[1], 3), dtype=np.uint8)
+    for i in range(len([c])):
+        color = (255, 0, 0)
+        #cv2.drawContours(imagen_procesada, [c], i, color)
+        cv2.drawContours(imagen_procesada, [hand_hull], i, color, 2)
+
+    cv2.circle(imagen_procesada, punto_mas_lejano, radius=10, color=(0, 255, 255), thickness=-1)#thickness -1 for filled circle
+
+    """
+    Recordatorio para el sergio del futuro:
+    
+    buscar punto mas lejano de un borde (será el centro de la palma de la mano) // de momento he usado centroide, pero sacar bien el otro
+    
+    sacar el circulo de mayor radio con centro el punto anterior (quizá añadir unos pixeles de margen extra para afinar mas)
+    
+    si eliminamos ese circulo, se nos quedan N formas volando, que seran dedos y la muñeca
+    
+    la muñeca será aquel tal que su largo sea mayor que su ancho y su ancho sea el mas ancho de los anchos
+    
+    pintar con el punto más lejano del centro que esté en el contorno? //cortando la muñeca
+    
+    
+    
+    """
     #print(imagen_procesada)
-   
+    imagen_procesada = cv2.cvtColor(imagen_procesada, cv2.COLOR_RGB2RGBA)
     setImagenReconocida(imagen_procesada)
 
 
