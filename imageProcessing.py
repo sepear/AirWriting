@@ -30,8 +30,11 @@ DKSize = (3, 3)  # tupla
 DIteraciones = 1  # iter
 
 cam = cv2.VideoCapture(0)  # Captura de la webcam
-
+_, frame = cam.read()#pillamos frame para tener el shape
+print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+print(frame.shape)
 UMBRAL_UNIFICACION = 8  # SI DOS PUNTOS ESTÁN A MENOS DE 8 PIXELES DE DISTANCIA, SE UNIFICAN
+
 
 def masLejano(hand_hull_coordinates, centro):
     distancia_mejor = 0
@@ -43,7 +46,7 @@ def masLejano(hand_hull_coordinates, centro):
         distancia = abs(x - centro[0]) + abs(y - centro[1])
         if distancia > distancia_mejor:
             distancia_mejor = distancia
-            mejor =(x, y)
+            mejor = (x, y)
     return mejor
 
 
@@ -61,32 +64,19 @@ def unificaVertices(hand_hull_coordinates):
                     new_y = int((y1 + y2) / 2)
 
                     x1 = x2 = new_x
-                    y1 = y2     = new_y
-    #elementos=
-    #contruyo aquí el nuevo, si ya está no añado
+                    y1 = y2 = new_y
+    # elementos=
+    # contruyo aquí el nuevo, si ya está no añado
 
-def applyMask(img1,img2):
-    print(img1.shape)
-    print(img2.shape)
-    #img1_bg = cv2.bitwise_and(img1,img1,mask = cv2.bitwise_not(img2))
-    #img2_fg = cv2.bitwise_and(img2,img2,mask = img2)
-    #dst = cv2.add(img1_bg,img2_fg)
-    dst = cv2.addWeighted(img1,1,img2,1,0)
+
+def applyMask(img1, img2):
+
+    # img1_bg = cv2.bitwise_and(img1,img1,mask = cv2.bitwise_not(img2))
+    # img2_fg = cv2.bitwise_and(img2,img2,mask = img2)
+    # dst = cv2.add(img1_bg,img2_fg)
+    print
+    print(f"shape1:{img1.shape}")
+    print(f"shape2:{img2.shape}")
+
+    dst = cv2.addWeighted(img1, 1, img2, 1, 0)
     return dst
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

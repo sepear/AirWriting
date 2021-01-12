@@ -33,10 +33,12 @@ class AplicacionGUI():
         self.root.geometry('1650x800') # Definimos el tamaño
 
         #global cam #definimos para que nos coja la camara
-        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 800) # Width
-        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 600) # Height
+        #cam.set(cv2.CAP_PROP_FRAME_WIDTH, 800) # Width
+        #cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 600) # Height
         global imagenReconocidaImage
-        imagenReconocidaImage = np.zeros((600, 800,3), np.uint8)
+        #imagenReconocidaImage = np.zeros((600, 800,3), np.uint8)
+        imagenReconocidaImage = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
+        #CHAPUZA
         imagenReconocidaImage = cv2.cvtColor(imagenReconocidaImage, cv2.COLOR_BGR2RGBA)
 
         video = tk.Label(self.root) # AÑadimos el video a la raiz
@@ -401,7 +403,7 @@ def guardar(): # Cuando se hace click en guardar se llama a esta función
 def reset(): # Cuando se hace click en reset se llama a esta función
     print("Reset pulsado")
     global imagenReconocidaImage
-    imagenReconocidaImage = np.zeros((600, 800,3), np.uint8)
+    imagenReconocidaImage = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
     imagenReconocidaImage = cv2.cvtColor(imagenReconocidaImage, cv2.COLOR_BGR2RGBA)
 
 def main(fotograma): # Este método main se ejecutará una vez por fotograma, aquí está toda la lógica del programa
