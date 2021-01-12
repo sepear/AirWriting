@@ -23,53 +23,80 @@ from imageProcessing import *
 from cnnModel import *
 
 
-
+debug=False
 
 
 class AplicacionGUI():
     def __init__(self,fguardar,freset):
         self.root = tk.Tk() # Creamos la raiz de tkinter
         self.root.title('Reconocimiento AirWriting') # Ponemos título a la ventana
-        self.root.geometry('1400x800') # Definimos el tamaño
-        
+        self.root.geometry('1650x800') # Definimos el tamaño
+
         #global cam #definimos para que nos coja la camara
         cam.set(cv2.CAP_PROP_FRAME_WIDTH, 800) # Width
         cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 600) # Height
-    
-    
+        global imagenReconocidaImage
+        imagenReconocidaImage = np.zeros((600, 800,3), np.uint8)
+        imagenReconocidaImage = cv2.cvtColor(imagenReconocidaImage, cv2.COLOR_BGR2RGBA)
+
         video = tk.Label(self.root) # AÑadimos el video a la raiz
-        video.place(x=30,y=50) # Coordenadas para posicionar el video
-
+        #video.place(x=30,y=50) # Coordenadas para posicionar el video
+        #video.pack(fill=tk.BOTH, side = tk.LEFT, expand = True)
+        video.grid(row=1,column=0)
+        self.root.columnconfigure(0, weight=1 , minsize = 800)
+        #self.root.rowconfigure(0, weight=1 , minsize = 600)
+        
         texto1 = tk.Label(self.root, text="Cámara") # Creamos un texto y lo añadimos a la raiz
-        texto1.place(x=330, y=20) # Le damos sus coordenadas
-
+        #texto1.place(x=330, y=20) # Le damos sus coordenadas
+        texto1.grid(row=0,column=0)
+        
+        buttonframe = tk.Frame(self.root)
+        buttonframe.grid(row=2,column=0)
+        
         imagenGuardar = ImageTk.PhotoImage(Image.open("images/save.png")) # Cargamos el icono de guardar
-        bGuardar = tk.Button(self.root, text='Guardar',image=imagenGuardar,command=fguardar) # Creamos un botón con ola imagen anterior y que ejecutará la función correspondiente
-        bGuardar.place(x=1000, y=460+350)
-
+        bGuardar = tk.Button(buttonframe, text='Guardar',image=imagenGuardar,command=fguardar) # Creamos un botón con ola imagen anterior y que ejecutará la función correspondiente
+        bGuardar.grid(row=0,column=0)
+        #bGuardar.place(x=1000, y=460+350)
+        
         imagenReset = Image.open("images/reset.png")
         imagenReset = imagenReset.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenResetRedimensionada = ImageTk.PhotoImage(imagenReset)
-        breset = tk.Button(self.root, text='Restart',image=imagenResetRedimensionada ,command=freset)
-        breset.place(x=1100,y=460+350)
-
+        breset = tk.Button(buttonframe, text='Restart',image=imagenResetRedimensionada ,command=freset)
+        #breset.place(x=1100,y=460+350)
+        breset.grid(row=0,column=1)
+        
+        imagenDebug = Image.open("images/computervision.png")
+        imagenDebug = imagenDebug.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
+        imagenDebugRedimensionada = ImageTk.PhotoImage(imagenDebug)
+        bdebug = tk.Button(buttonframe, text='Debug',image=imagenDebugRedimensionada ,command=self.fdebug)
+        #breset.place(x=1100,y=460+350)
+        bdebug.grid(row=0,column=3)
+        
+        
+        
         texto2 = tk.Label(self.root, text="Imagen dibujada")
-        texto2.place(x=1015,y=20)
+        #texto2.place(x=1015,y=20)
+        texto2.grid(row=0,column=1)
         
         render = ImageTk.PhotoImage(Image.open("images/placeholder.png")) # Cargamos una imagen de placeholder hasta que se obtenga la real  
         placeholder = tk.Label(self.root, image=render)
         placeholder.image = render
-        placeholder.place(x=1000, y=50)
+        #placeholder.place(x=1000, y=50)
+        placeholder.grid(row=1,column=1, columnspan = 3)
+        self.root.columnconfigure(1, weight=1 , minsize = 800)
+        self.root.rowconfigure(1, weight=1 , minsize = 600)
         
         prediccion = tk.StringVar(self.root,value="-")
         texto3 = tk.Label(self.root, textvariable=prediccion)
-        texto3.place(x=1000,y=400+350)
+        texto3.grid(row=2,column=1)
+        
         
         imagenSkinFilter = Image.open("images/config.png")
         imagenSkinFilter = imagenSkinFilter.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenSkinFilterRedimensionada = ImageTk.PhotoImage(imagenSkinFilter)
-        bclose = tk.Button(self.root, text='Configuracion',image=imagenSkinFilterRedimensionada ,command=self.cerrarVentana)
-        bclose.place(x=1200,y=560+350)
+        bclose = tk.Button(buttonframe, text='Configuracion',image=imagenSkinFilterRedimensionada ,command=self.cerrarVentana)
+        bclose.grid(row=0,column=2)
+        
         def on_closing(): # Función para cerrar Tkinter y soltar la cámara
             print("closing")
             cam.release()
@@ -80,15 +107,24 @@ class AplicacionGUI():
             frame = cv2.flip(frame, 1)
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             
+            global imagenReconocidaImage # Nos traemos la variable global con la nueva imagen de la predicción y la actualizamos
+            
             #main(cv2image) # Ejecutamos el método main
             main(frame)#CAMBIO HECHO POR SERGIO, COMO LUEGO SE LE HACEN COSAS INTERMEDIAS, EMJOR PASARLO EN BGR Y LUEGO YA AL FINAL SE PASA A RGBA
-
-            img = Image.fromarray(cv2image)
+            
+            if(debug):
+                imagen_dibujada = cv2image
+            else:
+                imagen_dibujada = applyMask(imagenReconocidaImage, cv2image)
+            
+            
+            
+            img = Image.fromarray(imagen_dibujada)
             imgtk = ImageTk.PhotoImage(image=img)
             video.imgtk = imgtk
             video.configure(image=imgtk)
             
-            global imagenReconocidaImage # Nos traemos la variable global con la nueva imagen de la predicción y la actualizamos
+            
             img =  ImageTk.PhotoImage(image=Image.fromarray(imagenReconocidaImage))
             placeholder.configure(image=img)
             placeholder.image = img
@@ -107,6 +143,9 @@ class AplicacionGUI():
         
         
         launchWindow(True)
+    def fdebug(self):
+        global debug
+        debug = not debug
         
 class skinfilterGUI():
     def __init__(self):
@@ -361,6 +400,9 @@ def guardar(): # Cuando se hace click en guardar se llama a esta función
 
 def reset(): # Cuando se hace click en reset se llama a esta función
     print("Reset pulsado")
+    global imagenReconocidaImage
+    imagenReconocidaImage = np.zeros((600, 800,3), np.uint8)
+    imagenReconocidaImage = cv2.cvtColor(imagenReconocidaImage, cv2.COLOR_BGR2RGBA)
 
 def main(fotograma): # Este método main se ejecutará una vez por fotograma, aquí está toda la lógica del programa
     # El parámetro fotograma es, un fotograma xD hay que aplicar toda la lógica y funciones desde aquí
@@ -447,7 +489,7 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
 
     #IMPORTANTE!!!!!!!!!!!!!!! ESTE ES EL PUNTO QUE VAMOS A PINTAR(ASUMIDO COMO PUNTA DE DEDO)
     punto_mas_lejano = masLejano(hand_hull_coordinates, (cX, cY))
-
+    print(punto_mas_lejano)
     print("######################3")
     print(hand_hull_coordinates)
     print(f"len:{len(hand_hull_coordinates)}")
@@ -488,7 +530,14 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     """
     #print(imagen_procesada)
     imagen_procesada = cv2.cvtColor(imagen_procesada, cv2.COLOR_RGB2RGBA)
-    setImagenReconocida(imagen_procesada)
+    cv2.circle(imagenReconocidaImage, punto_mas_lejano, radius=10, color=(0, 255, 255), thickness=-1)#thickness -1 for filled circle
+    global debug
+    if(debug):
+        setImagenReconocida(imagen_procesada)
+    else:
+        setImagenReconocida(imagenReconocidaImage)
+    
+    
 
 
 

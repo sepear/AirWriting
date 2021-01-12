@@ -61,6 +61,32 @@ def unificaVertices(hand_hull_coordinates):
                     new_y = int((y1 + y2) / 2)
 
                     x1 = x2 = new_x
-                    y1 = y2 = new_y
+                    y1 = y2     = new_y
     #elementos=
     #contruyo aquí el nuevo, si ya está no añado
+
+def applyMask(img1,img2):
+    print(img1.shape)
+    print(img2.shape)
+    #img1_bg = cv2.bitwise_and(img1,img1,mask = cv2.bitwise_not(img2))
+    #img2_fg = cv2.bitwise_and(img2,img2,mask = img2)
+    #dst = cv2.add(img1_bg,img2_fg)
+    dst = cv2.addWeighted(img1,1,img2,1,0)
+    return dst
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
