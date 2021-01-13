@@ -462,77 +462,88 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     #Asumimos que la mano es el contorno más grande, ya que estará en primer plano
 
     #AQUÍ PUEDE EXPLOTAR SI NO HAY VARIOS, MIRAR EL LEN O HACER TRY/EXECPTION
-    c = max(contours, key=cv2.contourArea)
+    if len(contours) > 0:
+        c = max(contours, key=cv2.contourArea)
 
 
-    #https: // www.pyimagesearch.com / 2016 / 02 / 01 / opencv - center - of - contour /
-    M = cv2.moments(c)#M es el centroide
-    cX = int(M["m10"] / M["m00"])#estas sus coordenadas
-    cY = int(M["m01"] / M["m00"])
+        #https: // www.pyimagesearch.com / 2016 / 02 / 01 / opencv - center - of - contour /
+        M = cv2.moments(c)#M es el centroide
 
+        try:
+            cX = int(M["m10"] / M["m00"])#estas sus coordenadas
+            cY = int(M["m01"] / M["m00"])
 
-    x, y, w, h = cv2.boundingRect(c)
+        except :
+            pass
 
-    # draw the biggest contour (c) in green
+        x, y, w, h = cv2.boundingRect(c)
 
-
-
-    imagen_procesada = cv2.cvtColor(imgray, cv2.COLOR_BGR2RGB)
-
-    cv2.circle(imagen_procesada, (cX, cY), 7, (255, 0, 0), -1)
-
-    cv2.rectangle(imagen_procesada, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-    hand_hull = cv2.convexHull(c, False)#ponemos en false para que devuelva los indices de los puntos del contorno
-    hand_hull_coordinates = cv2.convexHull(c, True)#ponemos en true para que devuelva las coordenadas
+        # draw the biggest contour (c) in green
 
 
 
+        imagen_procesada = cv2.cvtColor(imgray, cv2.COLOR_BGR2RGB)
 
-    #IMPORTANTE!!!!!!!!!!!!!!! ESTE ES EL PUNTO QUE VAMOS A PINTAR(ASUMIDO COMO PUNTA DE DEDO)
-    punto_mas_lejano = masLejano(hand_hull_coordinates, (cX, cY))
-    print(punto_mas_lejano)
-    print("######################3")
-    print(hand_hull_coordinates)
-    print(f"len:{len(hand_hull_coordinates)}")
-    print(type(hand_hull_coordinates))
-    print(hand_hull_coordinates[0])
-    print(type(hand_hull_coordinates[0]))
-    print(hand_hull_coordinates[0][0][0])
-    print(type(hand_hull_coordinates[0][0][0]))
-    print("######################")
-    #https: // opencv - python - tutroals.readthedocs.io / en / latest / py_tutorials / py_imgproc / py_contours / py_contour_features / py_contour_features.html
+        try:
+            cv2.circle(imagen_procesada, (cX, cY), 7, (255, 0, 0), -1)
+        except:
+            pass
+        cv2.rectangle(imagen_procesada, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    #imagen_procesada[:] = 0
-    #cv2.drawContours(imagen_procesada, [c], contourIdx=0, color=(0, 255, 0))
-    #cv2.drawContours(imagen_procesada, [hand_hull], contourIdx=0, color=(255, 0, 0))
-    drawing = np.zeros((imagen_procesada.shape[0], imagen_procesada.shape[1], 3), dtype=np.uint8)
-    for i in range(len([c])):
-        color = (255, 0, 0)
-        #cv2.drawContours(imagen_procesada, [c], i, color)
-        cv2.drawContours(imagen_procesada, [hand_hull], i, color, 2)
+        hand_hull = cv2.convexHull(c, False)#ponemos en false para que devuelva los indices de los puntos del contorno
+        hand_hull_coordinates = cv2.convexHull(c, True)#ponemos en true para que devuelva las coordenadas
 
-    cv2.circle(imagen_procesada, punto_mas_lejano, radius=10, color=(0, 255, 255), thickness=-1)#thickness -1 for filled circle
 
-    """
-    Recordatorio para el sergio del futuro:
-    
-    buscar punto mas lejano de un borde (será el centro de la palma de la mano) // de momento he usado centroide, pero sacar bien el otro
-    
-    sacar el circulo de mayor radio con centro el punto anterior (quizá añadir unos pixeles de margen extra para afinar mas)
-    
-    si eliminamos ese circulo, se nos quedan N formas volando, que seran dedos y la muñeca
-    
-    la muñeca será aquel tal que su largo sea mayor que su ancho y su ancho sea el mas ancho de los anchos
-    
-    pintar con el punto más lejano del centro que esté en el contorno? //cortando la muñeca
-    
-    
-    
-    """
-    #print(imagen_procesada)
-    imagen_procesada = cv2.cvtColor(imagen_procesada, cv2.COLOR_RGB2RGBA)
-    cv2.circle(imagenReconocidaImage, punto_mas_lejano, radius=10, color=(0, 255, 255), thickness=-1)#thickness -1 for filled circle
+
+
+        #IMPORTANTE!!!!!!!!!!!!!!! ESTE ES EL PUNTO QUE VAMOS A PINTAR(ASUMIDO COMO PUNTA DE DEDO)
+        try:
+            punto_mas_lejano = masLejano(hand_hull_coordinates, (cX, cY))
+        except:
+            pass
+        print(punto_mas_lejano)
+        print("######################3")
+        print(hand_hull_coordinates)
+        print(f"len:{len(hand_hull_coordinates)}")
+        print(type(hand_hull_coordinates))
+        print(hand_hull_coordinates[0])
+        print(type(hand_hull_coordinates[0]))
+        print(hand_hull_coordinates[0][0][0])
+        print(type(hand_hull_coordinates[0][0][0]))
+        print("######################")
+        #https: // opencv - python - tutroals.readthedocs.io / en / latest / py_tutorials / py_imgproc / py_contours / py_contour_features / py_contour_features.html
+
+        #imagen_procesada[:] = 0
+        #cv2.drawContours(imagen_procesada, [c], contourIdx=0, color=(0, 255, 0))
+        #cv2.drawContours(imagen_procesada, [hand_hull], contourIdx=0, color=(255, 0, 0))
+        drawing = np.zeros((imagen_procesada.shape[0], imagen_procesada.shape[1], 3), dtype=np.uint8)
+        for i in range(len([c])):
+            color = (255, 0, 0)
+            #cv2.drawContours(imagen_procesada, [c], i, color)
+            cv2.drawContours(imagen_procesada, [hand_hull], i, color, 2)
+
+        cv2.circle(imagen_procesada, punto_mas_lejano, radius=10, color=(0, 255, 255), thickness=-1)#thickness -1 for filled circle
+
+        """
+        Recordatorio para el sergio del futuro:
+        
+        buscar punto mas lejano de un borde (será el centro de la palma de la mano) // de momento he usado centroide, pero sacar bien el otro
+        
+        sacar el circulo de mayor radio con centro el punto anterior (quizá añadir unos pixeles de margen extra para afinar mas)
+        
+        si eliminamos ese circulo, se nos quedan N formas volando, que seran dedos y la muñeca
+        
+        la muñeca será aquel tal que su largo sea mayor que su ancho y su ancho sea el mas ancho de los anchos
+        
+        pintar con el punto más lejano del centro que esté en el contorno? //cortando la muñeca
+        
+        
+        
+        """
+        #print(imagen_procesada)
+        imagen_procesada = cv2.cvtColor(imagen_procesada, cv2.COLOR_RGB2RGBA)
+
+        cv2.circle(imagenReconocidaImage, punto_mas_lejano, radius=10, color=(0, 255, 255), thickness=-1)#thickness -1 for filled circle
     global debug
     if(debug):
         setImagenReconocida(imagen_procesada)
