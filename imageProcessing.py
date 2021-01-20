@@ -70,13 +70,10 @@ def unificaVertices(hand_hull_coordinates):
 
 
 def applyMask(img1, img2):
-
     # img1_bg = cv2.bitwise_and(img1,img1,mask = cv2.bitwise_not(img2))
     # img2_fg = cv2.bitwise_and(img2,img2,mask = img2)
     # dst = cv2.add(img1_bg,img2_fg)
-    print
-    print(f"shape1:{img1.shape}")
-    print(f"shape2:{img2.shape}")
-
     dst = cv2.addWeighted(img1, 1, img2, 1, 0)
     return dst
+
+

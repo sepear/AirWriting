@@ -22,90 +22,74 @@ from imageProcessing import *
 #importamos las herramientas del modelo 
 from cnnModel import *
 
-
 debug=False
-RGB_R = 0
-RGB_G = 0
-RGB_B = 0   
+RGB_R = 100
+RGB_G = 100
+RGB_B = 100   
 
 class AplicacionGUI():
-    def __init__(self,fguardar,freset):
+    def __init__(self):
         self.root = tk.Tk() # Creamos la raiz de tkinter
         self.root.title('Reconocimiento AirWriting') # Ponemos título a la ventana
         self.root.geometry('1650x800') # Definimos el tamaño
 
-        #global cam #definimos para que nos coja la camara
-        #cam.set(cv2.CAP_PROP_FRAME_WIDTH, 800) # Width
-        #cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 600) # Height
         global imagenReconocidaImage
-        #imagenReconocidaImage = np.zeros((600, 800,3), np.uint8)
         imagenReconocidaImage = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
-        #CHAPUZA
         imagenReconocidaImage = cv2.cvtColor(imagenReconocidaImage, cv2.COLOR_BGR2RGBA)
-
+        print("INICIANDO GUI")
         video = tk.Label(self.root) # AÑadimos el video a la raiz
-        #video.place(x=30,y=50) # Coordenadas para posicionar el video
-        #video.pack(fill=tk.BOTH, side = tk.LEFT, expand = True)
         video.grid(row=1,column=0)
         self.root.columnconfigure(0, weight=1 , minsize = 800)
-        #self.root.rowconfigure(0, weight=1 , minsize = 600)
         
         texto1 = tk.Label(self.root, text="Cámara") # Creamos un texto y lo añadimos a la raiz
-        #texto1.place(x=330, y=20) # Le damos sus coordenadas
         texto1.grid(row=0,column=0)
         
         buttonframe = tk.Frame(self.root)
         buttonframe.grid(row=2,column=0)
         
         imagenGuardar = ImageTk.PhotoImage(Image.open("images/save.png")) # Cargamos el icono de guardar
-        bGuardar = tk.Button(buttonframe, text='Guardar',image=imagenGuardar,command=fguardar) # Creamos un botón con ola imagen anterior y que ejecutará la función correspondiente
+        bGuardar = tk.Button(buttonframe, text='Guardar',image=imagenGuardar,command=self.guardar) # Creamos un botón con ola imagen anterior y que ejecutará la función correspondiente
         bGuardar.grid(row=0,column=0)
-        #bGuardar.place(x=1000, y=460+350)
         
         imagenReset = Image.open("images/reset.png")
         imagenReset = imagenReset.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenResetRedimensionada = ImageTk.PhotoImage(imagenReset)
-        breset = tk.Button(buttonframe, text='Restart',image=imagenResetRedimensionada ,command=freset)
-        #breset.place(x=1100,y=460+350)
+        breset = tk.Button(buttonframe, text='Restart',image=imagenResetRedimensionada ,command=self.reset)
         breset.grid(row=0,column=1)
         
         imagenDebug = Image.open("images/computervision.png")
         imagenDebug = imagenDebug.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenDebugRedimensionada = ImageTk.PhotoImage(imagenDebug)
         bdebug = tk.Button(buttonframe, text='Debug',image=imagenDebugRedimensionada ,command=self.fdebug)
-        #breset.place(x=1100,y=460+350)
         bdebug.grid(row=0,column=3)
         
         rgbframe = tk.Frame(self.root)
         rgbframe.grid(row=3, column=0)
         
         self.R_RGB = tk.Scale(rgbframe, from_=0, to=255, orient=tk.HORIZONTAL)
-        self.R_RGB.set(0)
+        self.R_RGB.set(100)
         label_r = tk.Label(rgbframe, text="R")
         label_r.grid(row=0, column=0)
         self.R_RGB.grid(row=0, column=1)      
         
         self.G_RGB = tk.Scale(rgbframe, from_=0, to=255, orient=tk.HORIZONTAL)
-        self.G_RGB.set(0)
+        self.G_RGB.set(100)
         label_g = tk.Label(rgbframe, text="G")
         label_g.grid(row=1, column=0)
         self.G_RGB.grid(row=1, column=1)
                         
         self.B_RGB = tk.Scale(rgbframe, from_=0, to=255, orient=tk.HORIZONTAL)
-        self.B_RGB.set(0)
+        self.B_RGB.set(100)
         label_b = tk.Label(rgbframe, text="B")
         label_b.grid(row=2, column=0)
         self.B_RGB.grid(row=2, column=1)      
  
-        
         texto2 = tk.Label(self.root, text="Imagen dibujada")
-        #texto2.place(x=1015,y=20)
         texto2.grid(row=0,column=1)
         
         render = ImageTk.PhotoImage(Image.open("images/placeholder.png")) # Cargamos una imagen de placeholder hasta que se obtenga la real  
         placeholder = tk.Label(self.root, image=render)
         placeholder.image = render
-        #placeholder.place(x=1000, y=50)
         placeholder.grid(row=1,column=1, columnspan = 3)
         self.root.columnconfigure(1, weight=1 , minsize = 800)
         self.root.rowconfigure(1, weight=1 , minsize = 600)
@@ -114,7 +98,6 @@ class AplicacionGUI():
         texto3 = tk.Label(self.root, textvariable=prediccion)
         texto3.grid(row=2,column=1)
         
-        
         imagenSkinFilter = Image.open("images/config.png")
         imagenSkinFilter = imagenSkinFilter.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenSkinFilterRedimensionada = ImageTk.PhotoImage(imagenSkinFilter)
@@ -122,7 +105,6 @@ class AplicacionGUI():
         bclose.grid(row=0,column=2)
         
         def on_closing(): # Función para cerrar Tkinter y soltar la cámara
-            print("closing")
             cam.release()
             self.root.destroy()
         self.root.protocol("WM_DELETE_WINDOW", on_closing)
@@ -132,17 +114,14 @@ class AplicacionGUI():
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
             
             global imagenReconocidaImage # Nos traemos la variable global con la nueva imagen de la predicción y la actualizamos
-            
-            #main(cv2image) # Ejecutamos el método main
-            
-            
-            
             global RGB_R
             global RGB_G
             global RGB_B 
+            
             RGB_R = self.R_RGB.get()
             RGB_G = self.G_RGB.get()
             RGB_B = self.B_RGB.get()
+            
             main(frame)#CAMBIO HECHO POR SERGIO, COMO LUEGO SE LE HACEN COSAS INTERMEDIAS, EMJOR PASARLO EN BGR Y LUEGO YA AL FINAL SE PASA A RGBA
             
             if(debug):
@@ -150,13 +129,10 @@ class AplicacionGUI():
             else:
                 imagen_dibujada = applyMask(imagenReconocidaImage, cv2image)
             
-            
-            
             img = Image.fromarray(imagen_dibujada)
             imgtk = ImageTk.PhotoImage(image=img)
             video.imgtk = imgtk
             video.configure(image=imgtk)
-            
             
             img =  ImageTk.PhotoImage(image=Image.fromarray(imagenReconocidaImage))
             placeholder.configure(image=img)
@@ -171,25 +147,28 @@ class AplicacionGUI():
         self.root.mainloop() # Bucle de Tkinter para generar la ventana y el contenido
         
     def cerrarVentana(self):
-   
         self.root.destroy()
-        
-        
         launchWindow(True)
+    
     def fdebug(self):
         global debug
         debug = not debug
+        self.reset()
+    def guardar(self): # Cuando se hace click en guardar se llama a esta función
+        print("Guardar pulsado")
+
+    def reset(self): # Cuando se hace click en reset se llama a esta función
+        print("Reset pulsado")
+        global imagenReconocidaImage
+        imagenReconocidaImage = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
+        imagenReconocidaImage = cv2.cvtColor(imagenReconocidaImage, cv2.COLOR_BGR2RGBA)
         
 class skinfilterGUI():
     def __init__(self):
-        
         self.root = tk.Tk() # Creamos la raiz de tkinter
         self.root.title('Reconocimiento SkinFilter') # Ponemos título a la ventana
         self.root.geometry('975x600') # Definimos el tamaño
-        
-        cam.set(cv2.CAP_PROP_FRAME_WIDTH, 320) # Width
-        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 240) # Height
-    
+
         self.frameCounter = 0
         
         video1 = tk.Label(self.root) # AÑadimos el video1 a la raiz
@@ -342,7 +321,6 @@ class skinfilterGUI():
             DKSize = (self.DKSize_B.get(),self.DKSize_B.get())
             DIteraciones = self.DIteraciones_B.get()
         
-  
             lower = np.array([h_min_global, s_min_global, v_min_global]) # Calculamos la máscara 
             upper = np.array([h_max_global, s_max_global, v_max_global])
             mask = cv2.inRange(imgHsv, lower, upper)
@@ -368,7 +346,7 @@ class skinfilterGUI():
             video3.imgtk3 = imgtk3
             video3.configure(image=imgtk3)
             
-            filtro_media = cv2.blur(mask,getFMSize())  
+            filtro_media = cv2.blur(mask,FMSize)  
             filtro_media = cv2.cvtColor(filtro_media, cv2.COLOR_BGR2RGBA)
             img4 = Image.fromarray(filtro_media)
             imgtk4 = ImageTk.PhotoImage(image=img4)
@@ -396,11 +374,17 @@ class skinfilterGUI():
         show_frame() # Ejecutamos un frame
         self.root.mainloop() # Bucle de Tkinter para generar la ventana y el contenido
         
-    def cerrarVentana(self): # Nos devuelve al programa principal
-       
+    def cerrarVentana(self): # Nos devuelve al programa principal       
         self.root.destroy()  
         launchWindow()
+    
+def setPrediccionText(text): # Esta función actualiza la variable global para que cambie en Tkinter. Recibe un String
+    global prediccionText
+    prediccionText = "Predicción "+text
 
+def setImagenReconocida(array): # Esta función actualiza la variable global para que cambie en Tkinter. Recibe un array de numpy
+    global imagenReconocidaImage
+    imagenReconocidaImage = array
 def getSkinFilteredImage(frame): # Recibe un fotograma le aplica el skinfilter y devuelve la máscara
     global h_min_global 
     global h_max_global 
@@ -413,29 +397,10 @@ def getSkinFilteredImage(frame): # Recibe un fotograma le aplica el skinfilter y
     upper = np.array([h_max_global, s_max_global, v_max_global])
     mask = cv2.inRange(imgHsv, lower, upper)
     mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-    return mask
-    
-def setPrediccionText(text): # Esta función actualiza la variable global para que cambie en Tkinter. Recibe un String
-    global prediccionText
-    prediccionText = "Predicción "+text
-
-def setImagenReconocida(array): # Esta función actualiza la variable global para que cambie en Tkinter. Recibe un array de numpy
-    global imagenReconocidaImage
-    imagenReconocidaImage = array
-    
-
+    return mask    
 ####################################################################################################################################
 
 # A partir de aquí lo que os interesa y podeis tocar
-
-def guardar(): # Cuando se hace click en guardar se llama a esta función
-    print("Guardar pulsado")
-
-def reset(): # Cuando se hace click en reset se llama a esta función
-    print("Reset pulsado")
-    global imagenReconocidaImage
-    imagenReconocidaImage = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
-    imagenReconocidaImage = cv2.cvtColor(imagenReconocidaImage, cv2.COLOR_BGR2RGBA)
 
 def main(fotograma): # Este método main se ejecutará una vez por fotograma, aquí está toda la lógica del programa
     # El parámetro fotograma es, un fotograma xD hay que aplicar toda la lógica y funciones desde aquí
@@ -451,9 +416,10 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     #setImagenReconocida(np.zeros((40,40))*150) # Ejemplo de como cambiar la imagen de la predicción
     
     ############## Suavizado ###############
-    #filtro_media_size = getFMSize();  #Función para que alberto haga la función y la enlace con los "botoncitos" los más comunes son (3,3) y (5,5)
+    global FMSize
+    #filtro_media_size = FMSize;  #Función para que alberto haga la función y la enlace con los "botoncitos" los más comunes son (3,3) y (5,5)
     
-    filtro_media = cv2.blur(skinfiltered,getFMSize())   # (3,3) sustituir por "filtro_media_size" cuando la función esté hecha
+    filtro_media = cv2.blur(skinfiltered,FMSize)   # (3,3) sustituir por "filtro_media_size" cuando la función esté hecha
     
     ############### Erosión #########################
     
@@ -495,24 +461,16 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
     #AQUÍ PUEDE EXPLOTAR SI NO HAY VARIOS, MIRAR EL LEN O HACER TRY/EXECPTION
     if len(contours) > 0:
         c = max(contours, key=cv2.contourArea)
-
-
         #https: // www.pyimagesearch.com / 2016 / 02 / 01 / opencv - center - of - contour /
         M = cv2.moments(c)#M es el centroide
-
         try:
             cX = int(M["m10"] / M["m00"])#estas sus coordenadas
             cY = int(M["m01"] / M["m00"])
-
         except :
             pass
-
         x, y, w, h = cv2.boundingRect(c)
-
         # draw the biggest contour (c) in green
-
-
-
+        
         imagen_procesada = cv2.cvtColor(imgray, cv2.COLOR_BGR2RGB)
 
         try:
@@ -524,24 +482,12 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
         hand_hull = cv2.convexHull(c, False)#ponemos en false para que devuelva los indices de los puntos del contorno
         hand_hull_coordinates = cv2.convexHull(c, True)#ponemos en true para que devuelva las coordenadas
 
-
-
-
         #IMPORTANTE!!!!!!!!!!!!!!! ESTE ES EL PUNTO QUE VAMOS A PINTAR(ASUMIDO COMO PUNTA DE DEDO)
         try:
             punto_mas_lejano = masLejano(hand_hull_coordinates, (cX, cY))
         except:
             pass
-        print(punto_mas_lejano)
-        print("######################3")
-        print(hand_hull_coordinates)
-        print(f"len:{len(hand_hull_coordinates)}")
-        print(type(hand_hull_coordinates))
-        print(hand_hull_coordinates[0])
-        print(type(hand_hull_coordinates[0]))
-        print(hand_hull_coordinates[0][0][0])
-        print(type(hand_hull_coordinates[0][0][0]))
-        print("######################")
+        
         #https: // opencv - python - tutroals.readthedocs.io / en / latest / py_tutorials / py_imgproc / py_contours / py_contour_features / py_contour_features.html
 
         #imagen_procesada[:] = 0
@@ -567,9 +513,7 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
         la muñeca será aquel tal que su largo sea mayor que su ancho y su ancho sea el mas ancho de los anchos
         
         pintar con el punto más lejano del centro que esté en el contorno? //cortando la muñeca
-        
-        
-        
+    
         """
         global RGB_R
         global RGB_G
@@ -578,19 +522,23 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
         cv2.circle(imagenReconocidaImage, punto_mas_lejano, radius=10, color=(RGB_R, RGB_G, RGB_B), thickness=-1)#thickness -1 for filled circle
         global debug
         if(debug):
+            print(punto_mas_lejano)
+            print("######################3")
+            print(hand_hull_coordinates)
+            print(f"len:{len(hand_hull_coordinates)}")
+            print(type(hand_hull_coordinates))
+            print(hand_hull_coordinates[0])
+            print(type(hand_hull_coordinates[0]))
+            print(hand_hull_coordinates[0][0][0])
+            print(type(hand_hull_coordinates[0][0][0]))
+            print("######################") 
             setImagenReconocida(imagen_procesada)
         else:
             setImagenReconocida(imagenReconocidaImage)
-  
-    
-    
-
 
 
 ########### Funciones auxiliares procesamiento ##########
 #Función para que alberto haga la función y la enlace con los "botoncitos" los más comunes son (3,3) y (5,5)
-def getFMSize():
-    return FMSize
 
 #Función para determinar el tamaño del kernel y alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
 def getEKSize():
@@ -600,7 +548,6 @@ def getEKSize():
 def getEIteraciones():
     return EIteraciones
 
-
 #Función para determinar el tamaño del kernel y Alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
 def getDKSize():
     return DKSize
@@ -609,13 +556,11 @@ def getDKSize():
 def getDIteraciones():
     return DIteraciones
 
-
 def launchWindow(skinfilter=False):
     if(skinfilter):
-        print("lanzando skin ilter")
         mi_app = skinfilterGUI() # Lanzamos la aplicación 
     else:
-        mi_app = AplicacionGUI(guardar,reset) # Lanzamos la aplicación 
+        mi_app = AplicacionGUI() # Lanzamos la aplicación 
 
 if __name__ == '__main__': # Inicializamos la aplicación al estilo python 
     launchWindow()
