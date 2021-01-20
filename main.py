@@ -24,7 +24,9 @@ from cnnModel import *
 
 
 debug=False
-
+RGB_R = 0
+RGB_G = 0
+RGB_B = 0   
 
 class AplicacionGUI():
     def __init__(self,fguardar,freset):
@@ -74,7 +76,27 @@ class AplicacionGUI():
         #breset.place(x=1100,y=460+350)
         bdebug.grid(row=0,column=3)
         
+        rgbframe = tk.Frame(self.root)
+        rgbframe.grid(row=3, column=0)
         
+        self.R_RGB = tk.Scale(rgbframe, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.R_RGB.set(0)
+        label_r = tk.Label(rgbframe, text="R")
+        label_r.grid(row=0, column=0)
+        self.R_RGB.grid(row=0, column=1)      
+        
+        self.G_RGB = tk.Scale(rgbframe, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.G_RGB.set(0)
+        label_g = tk.Label(rgbframe, text="G")
+        label_g.grid(row=1, column=0)
+        self.G_RGB.grid(row=1, column=1)
+                        
+        self.B_RGB = tk.Scale(rgbframe, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.B_RGB.set(0)
+        label_b = tk.Label(rgbframe, text="B")
+        label_b.grid(row=2, column=0)
+        self.B_RGB.grid(row=2, column=1)      
+ 
         
         texto2 = tk.Label(self.root, text="Imagen dibujada")
         #texto2.place(x=1015,y=20)
@@ -112,6 +134,15 @@ class AplicacionGUI():
             global imagenReconocidaImage # Nos traemos la variable global con la nueva imagen de la predicción y la actualizamos
             
             #main(cv2image) # Ejecutamos el método main
+            
+            
+            
+            global RGB_R
+            global RGB_G
+            global RGB_B 
+            RGB_R = self.R_RGB.get()
+            RGB_G = self.G_RGB.get()
+            RGB_B = self.B_RGB.get()
             main(frame)#CAMBIO HECHO POR SERGIO, COMO LUEGO SE LE HACEN COSAS INTERMEDIAS, EMJOR PASARLO EN BGR Y LUEGO YA AL FINAL SE PASA A RGBA
             
             if(debug):
@@ -540,15 +571,17 @@ def main(fotograma): # Este método main se ejecutará una vez por fotograma, aq
         
         
         """
-        #print(imagen_procesada)
+        global RGB_R
+        global RGB_G
+        global RGB_B 
         imagen_procesada = cv2.cvtColor(imagen_procesada, cv2.COLOR_RGB2RGBA)
-
-        cv2.circle(imagenReconocidaImage, punto_mas_lejano, radius=10, color=(0, 255, 255), thickness=-1)#thickness -1 for filled circle
-    global debug
-    if(debug):
-        setImagenReconocida(imagen_procesada)
-    else:
-        setImagenReconocida(imagenReconocidaImage)
+        cv2.circle(imagenReconocidaImage, punto_mas_lejano, radius=10, color=(RGB_R, RGB_G, RGB_B), thickness=-1)#thickness -1 for filled circle
+        global debug
+        if(debug):
+            setImagenReconocida(imagen_procesada)
+        else:
+            setImagenReconocida(imagenReconocidaImage)
+  
     
     
 
