@@ -5,6 +5,8 @@ import tkinter as tk
 import cv2
 from PIL import Image, ImageTk
 import numpy as np
+import main
+
 
 imagenReconocidaImage = np.ones((40, 40)) * 150  # Variable para comunicarnos con Tkinter
 
@@ -76,4 +78,11 @@ def applyMask(img1, img2):
     dst = cv2.addWeighted(img1, 1, img2, 1, 0)
     return dst
 
+def getSkinFilteredImage(frame): # Recibe un fotograma le aplica el skinfilter y devuelve la máscara
+    imgHsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    lower = np.array([h_min_global, s_min_global, v_min_global])
+    upper = np.array([h_max_global, s_max_global, v_max_global])
+    mask = cv2.inRange(imgHsv, lower, upper)
+    mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    return mask    
 

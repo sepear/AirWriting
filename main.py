@@ -31,7 +31,7 @@ class AplicacionGUI():
     def __init__(self):
         self.root = tk.Tk() # Creamos la raiz de tkinter
         self.root.title('Reconocimiento AirWriting') # Ponemos título a la ventana
-        self.root.geometry('1650x800') # Definimos el tamaño
+        self.root.geometry('1920x1080') # Definimos el tamaño
 
         global imagenReconocidaImage
         imagenReconocidaImage = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
@@ -39,7 +39,7 @@ class AplicacionGUI():
         print("INICIANDO GUI")
         video = tk.Label(self.root) # AÑadimos el video a la raiz
         video.grid(row=1,column=0)
-        self.root.columnconfigure(0, weight=1 , minsize = 800)
+        self.root.columnconfigure(0, weight=1 , minsize = 1080)
         
         texto1 = tk.Label(self.root, text="Cámara") # Creamos un texto y lo añadimos a la raiz
         texto1.grid(row=0,column=0)
@@ -167,9 +167,16 @@ class skinfilterGUI():
     def __init__(self):
         self.root = tk.Tk() # Creamos la raiz de tkinter
         self.root.title('Reconocimiento SkinFilter') # Ponemos título a la ventana
-        self.root.geometry('975x600') # Definimos el tamaño
-
+        self.root.geometry('1920x1080') # Definimos el tamaño
+        
         self.frameCounter = 0
+        
+        self.root.columnconfigure(0, weight=1 , minsize = 452)
+        self.root.columnconfigure(1, weight=1 , minsize = 452)
+        self.root.columnconfigure(2, weight=1 , minsize = 452)
+        
+        self.root.rowconfigure(0, weight=1 , minsize = 339)
+        self.root.rowconfigure(1, weight=1 , minsize = 339)
         
         video1 = tk.Label(self.root) # AÑadimos el video1 a la raiz
         video1.grid(row=0,column=0)
@@ -189,19 +196,6 @@ class skinfilterGUI():
         video6 = tk.Label(self.root) # AÑadimos el video3 a la raiz
         video6.grid(row=1,column=2)
 
-        global h_min_global  # Nos traemos las variables globales
-        global h_max_global 
-        global s_min_global 
-        global s_max_global 
-        global v_min_global 
-        global v_max_global 
-        
-        global FMSize
-        global EKSize
-        global EIteraciones
-        global DKSize
-        global DIteraciones
-        
         # Definimos todos los sliders y los seteamos con el valor de las variables globales por defecto
         self.h_min = tk.Scale(self.root, from_=0, to=179, orient=tk.HORIZONTAL)
         self.h_min.set(h_min_global)
@@ -274,7 +268,7 @@ class skinfilterGUI():
         imagenSkinFilter = imagenSkinFilter.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenSkinFilterRedimensionada = ImageTk.PhotoImage(imagenSkinFilter)
         bclose = tk.Button(self.root, text='volver',image=imagenSkinFilterRedimensionada ,command=self.cerrarVentana)
-        bclose.grid(row=10,column=2)
+        bclose.grid(row=10,column=2,rowspan=2)
 
         def on_closing():# Función para cerrar Tkinter y soltar la cámara
             print("closing")
@@ -296,12 +290,7 @@ class skinfilterGUI():
             
             imgHsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
             
-            global h_min_global # Nos traemos las variables globales
-            global h_max_global 
-            global s_min_global 
-            global s_max_global 
-            global v_min_global 
-            global v_max_global 
+
             h_min_global = self.h_min.get() # Almacenamos el valor de los sliders en las variables globales
             h_max_global = self.h_max.get()
             s_min_global = self.s_min.get()
@@ -309,12 +298,8 @@ class skinfilterGUI():
             v_min_global = self.v_min.get()
             v_max_global = self.v_max.get()
             
-            global FMSize
-            global EKSize
-            global EIteraciones
-            global DKSize
-            global DIteraciones
-            
+
+
             FMSize = (self.FMSize_B.get(),self.FMSize_B.get())
             EKSize = (self.EKSize_B.get(),self.EKSize_B.get())
             EIteraciones = self.EIteraciones_B.get() 
@@ -328,20 +313,26 @@ class skinfilterGUI():
             result = cv2.bitwise_and(img, img, mask=mask)
   
             mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-   
+            #escala = (640,480) 
+            escala = (452,339)
+            #escala = (320,240)
             cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
             img1 = Image.fromarray(cv2image)
+            
+            img1 = img1.resize(escala, Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
             imgtk1 = ImageTk.PhotoImage(image=img1)
             video1.imgtk = imgtk1
             video1.configure(image=imgtk1)
             
             img2 = Image.fromarray(mask)
+            img2 = img2.resize(escala, Image.ANTIALIAS)
             imgtk2 = ImageTk.PhotoImage(image=img2)
             video2.imgtk = imgtk2
             video2.configure(image=imgtk2)
             
             result = cv2.cvtColor(result, cv2.COLOR_BGR2RGBA)
             img3 = Image.fromarray(result)
+            img3 = img3.resize(escala, Image.ANTIALIAS)
             imgtk3 = ImageTk.PhotoImage(image=img3)
             video3.imgtk3 = imgtk3
             video3.configure(image=imgtk3)
@@ -349,6 +340,7 @@ class skinfilterGUI():
             filtro_media = cv2.blur(mask,FMSize)  
             filtro_media = cv2.cvtColor(filtro_media, cv2.COLOR_BGR2RGBA)
             img4 = Image.fromarray(filtro_media)
+            img4 = img4.resize(escala, Image.ANTIALIAS)
             imgtk4 = ImageTk.PhotoImage(image=img4)
             video4.imgtk4 = imgtk4
             video4.configure(image=imgtk4)
@@ -357,6 +349,7 @@ class skinfilterGUI():
             filtro_erosion = cv2.erode(filtro_media, erosion_kernel, iterations = getEIteraciones())            
             filtro_erosion = cv2.cvtColor(filtro_erosion, cv2.COLOR_BGR2RGBA)
             img5 = Image.fromarray(filtro_erosion)
+            img5 = img5.resize(escala, Image.ANTIALIAS)
             imgtk5 = ImageTk.PhotoImage(image=img5)
             video5.imgtk5 = imgtk5
             video5.configure(image=imgtk5)
@@ -365,6 +358,7 @@ class skinfilterGUI():
             filtro_dilatacion = cv2.erode(filtro_erosion, dilation_kernel, iterations = getDIteraciones()) 
             filtro_dilatacion = cv2.cvtColor(filtro_dilatacion, cv2.COLOR_BGR2RGBA)
             img6 = Image.fromarray(filtro_dilatacion)
+            img6 = img6.resize(escala, Image.ANTIALIAS)
             imgtk6 = ImageTk.PhotoImage(image=img6)
             video6.imgtk6 = imgtk6
             video6.configure(image=imgtk6)
@@ -385,19 +379,8 @@ def setPrediccionText(text): # Esta función actualiza la variable global para q
 def setImagenReconocida(array): # Esta función actualiza la variable global para que cambie en Tkinter. Recibe un array de numpy
     global imagenReconocidaImage
     imagenReconocidaImage = array
-def getSkinFilteredImage(frame): # Recibe un fotograma le aplica el skinfilter y devuelve la máscara
-    global h_min_global 
-    global h_max_global 
-    global s_min_global 
-    global s_max_global 
-    global v_min_global 
-    global v_max_global
-    imgHsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    lower = np.array([h_min_global, s_min_global, v_min_global])
-    upper = np.array([h_max_global, s_max_global, v_max_global])
-    mask = cv2.inRange(imgHsv, lower, upper)
-    mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-    return mask    
+
+
 ####################################################################################################################################
 
 # A partir de aquí lo que os interesa y podeis tocar
