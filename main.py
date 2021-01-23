@@ -31,17 +31,24 @@ class AplicacionGUI():
     def __init__(self):
         self.root = tk.Tk() # Creamos la raiz de tkinter
         self.root.title('Reconocimiento AirWriting') # Ponemos título a la ventana
-        self.root.geometry('1920x1080') # Definimos el tamaño
+        self.root.geometry('1280x720') # Definimos el tamaño
 
         global imagenReconocidaImage
         imagenReconocidaImage = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
         imagenReconocidaImage = cv2.cvtColor(imagenReconocidaImage, cv2.COLOR_BGR2RGBA)
         print("INICIANDO GUI")
-        video = tk.Label(self.root) # AÑadimos el video a la raiz
-        video.grid(row=1,column=0)
-        self.root.columnconfigure(0, weight=1 , minsize = 1080)
         
-        texto1 = tk.Label(self.root, text="Cámara") # Creamos un texto y lo añadimos a la raiz
+        videoframe = tk.Frame(self.root)
+        videoframe.grid(row=0, column=0)
+        
+        video = tk.Label(videoframe) # AÑadimos el video a la raiz
+        video.grid(row=1,column=0)
+        self.root.columnconfigure(0, weight=1 , minsize = 720/2)
+        self.root.columnconfigure(1, weight=1 , minsize = 720/2)
+        self.root.rowconfigure(0, weight=1 , minsize = 720/8)
+        self.root.rowconfigure(1, weight=1 , minsize = 720/8)
+        
+        texto1 = tk.Label(videoframe, text="Cámara") # Creamos un texto y lo añadimos a la raiz
         texto1.grid(row=0,column=0)
         
         buttonframe = tk.Frame(self.root)
@@ -63,7 +70,7 @@ class AplicacionGUI():
         bdebug = tk.Button(buttonframe, text='Debug',image=imagenDebugRedimensionada ,command=self.fdebug)
         bdebug.grid(row=0,column=3)
         
-        rgbframe = tk.Frame(self.root)
+        rgbframe = tk.LabelFrame(self.root,text = "RGB")
         rgbframe.grid(row=3, column=0)
         
         self.R_RGB = tk.Scale(rgbframe, from_=0, to=255, orient=tk.HORIZONTAL)
@@ -84,15 +91,19 @@ class AplicacionGUI():
         label_b.grid(row=2, column=0)
         self.B_RGB.grid(row=2, column=1)      
  
-        texto2 = tk.Label(self.root, text="Imagen dibujada")
-        texto2.grid(row=0,column=1)
+    
+    
+        videodebugframe = tk.Frame(self.root)
+        videodebugframe.grid(row=0, column=1)
+        
+        texto2 = tk.Label(videodebugframe, text="Imagen dibujada")
+        texto2.grid(row=0,column=0)
         
         render = ImageTk.PhotoImage(Image.open("images/placeholder.png")) # Cargamos una imagen de placeholder hasta que se obtenga la real  
-        placeholder = tk.Label(self.root, image=render)
+        placeholder = tk.Label(videodebugframe, image=render)
         placeholder.image = render
-        placeholder.grid(row=1,column=1, columnspan = 3)
-        self.root.columnconfigure(1, weight=1 , minsize = 800)
-        self.root.rowconfigure(1, weight=1 , minsize = 600)
+        placeholder.grid(row=1,column=0)
+
         
         prediccion = tk.StringVar(self.root,value="-")
         texto3 = tk.Label(self.root, textvariable=prediccion)
@@ -129,14 +140,30 @@ class AplicacionGUI():
             else:
                 imagen_dibujada = applyMask(imagenReconocidaImage, cv2image)
             
+            scale_percent_width = 85 * self.root.winfo_width()/1280# percent of original size
+            scale_percent_height = 85 * self.root.winfo_height()/720# percent of original size
+            scale_percent_width = scale_percent_width if scale_percent_width>60 else 60
+            scale_percent_height =  scale_percent_height if scale_percent_height>60 else 60
+            width = int(imagen_dibujada.shape[1] * scale_percent_width / 100)
+            height = int(imagen_dibujada.shape[0] * scale_percent_height / 100)
+            dim = (width, height)
+            # resize image
+            imagen_dibujada = cv2.resize(imagen_dibujada, dim, interpolation = cv2.INTER_AREA)
             img = Image.fromarray(imagen_dibujada)
+            
             imgtk = ImageTk.PhotoImage(image=img)
             video.imgtk = imgtk
             video.configure(image=imgtk)
-            
-            img =  ImageTk.PhotoImage(image=Image.fromarray(imagenReconocidaImage))
-            placeholder.configure(image=img)
-            placeholder.image = img
+
+            width = int(imagenReconocidaImage.shape[1] * scale_percent_width / 100)
+            height = int(imagenReconocidaImage.shape[0] * scale_percent_height / 100)
+            dim = (width, height)
+            # resize image
+            imagen_dibujada = cv2.resize(imagenReconocidaImage, dim, interpolation = cv2.INTER_AREA)            
+            imgAnalizada = Image.fromarray(imagen_dibujada)
+            imgAnalizada =  ImageTk.PhotoImage(image=imgAnalizada)
+            placeholder.configure(image=imgAnalizada)
+            placeholder.image = imgAnalizada
             
             global prediccionText # Nos traemoos la variable global con el nuevo texto de la predicción y lo actualizamos
             prediccion.set(prediccionText)            
@@ -167,100 +194,163 @@ class skinfilterGUI():
     def __init__(self):
         self.root = tk.Tk() # Creamos la raiz de tkinter
         self.root.title('Reconocimiento SkinFilter') # Ponemos título a la ventana
-        self.root.geometry('1920x1080') # Definimos el tamaño
+        self.root.geometry('1280x720') # Definimos el tamaño
         
         self.frameCounter = 0
         
-        self.root.columnconfigure(0, weight=1 , minsize = 452)
-        self.root.columnconfigure(1, weight=1 , minsize = 452)
-        self.root.columnconfigure(2, weight=1 , minsize = 452)
+        self.root.columnconfigure(0, weight=1 , minsize = 240)
+        self.root.columnconfigure(1, weight=1 , minsize = 240)
+        self.root.columnconfigure(2, weight=1 , minsize = 240)
         
-        self.root.rowconfigure(0, weight=1 , minsize = 339)
-        self.root.rowconfigure(1, weight=1 , minsize = 339)
+        self.root.rowconfigure(0, weight=1 , minsize = 720/8)
+        self.root.rowconfigure(1, weight=1 , minsize = 720/8)
         
-        video1 = tk.Label(self.root) # AÑadimos el video1 a la raiz
-        video1.grid(row=0,column=0)
+        video1frame = tk.Frame(self.root)
+        video1frame.grid(row=0, column=0)
+        texto1 = tk.Label(video1frame, text="Cámara") # Creamos un texto y lo añadimos a la raiz
+        texto1.grid(row=0,column=0)
+        video1 = tk.Label(video1frame) # AÑadimos el video1 a la raiz
+        video1.grid(row=1,column=0)
         
-        video2 = tk.Label(self.root) # AÑadimos el video2 a la raiz
-        video2.grid(row=0,column=1)
-        
-        video3 = tk.Label(self.root) # AÑadimos el video3 a la raiz
-        video3.grid(row=0,column=2)
-        
-        video4 = tk.Label(self.root) # AÑadimos el video3 a la raiz
+        video2frame = tk.Frame(self.root)
+        video2frame.grid(row=0, column=1)
+        texto2 = tk.Label(video2frame, text="Máscara HSV") # Creamos un texto y lo añadimos a la raiz
+        texto2.grid(row=0,column=0)
+        video2 = tk.Label(video2frame) # AÑadimos el video2 a la raiz
+        video2.grid(row=1,column=0)
+
+        video3frame = tk.Frame(self.root)
+        video3frame.grid(row=0, column=2)
+        texto3 = tk.Label(video3frame, text="Máscara HSV aplicada") # Creamos un texto y lo añadimos a la raiz
+        texto3.grid(row=0,column=0)        
+        video3 = tk.Label(video3frame) # AÑadimos el video3 a la raiz
+        video3.grid(row=1,column=0)
+
+        video4frame = tk.Frame(self.root)
+        video4frame.grid(row=1, column=0)
+        texto4 = tk.Label(video4frame, text="Filtro media") # Creamos un texto y lo añadimos a la raiz
+        texto4.grid(row=0,column=0)                
+        video4 = tk.Label(video4frame) # AÑadimos el video3 a la raiz
         video4.grid(row=1,column=0)
-        
-        video5 = tk.Label(self.root) # AÑadimos el video3 a la raiz
-        video5.grid(row=1,column=1)
-        
-        video6 = tk.Label(self.root) # AÑadimos el video3 a la raiz
-        video6.grid(row=1,column=2)
+
+        video5frame = tk.Frame(self.root)
+        video5frame.grid(row=1, column=1)
+        texto5 = tk.Label(video5frame, text="Erosión") # Creamos un texto y lo añadimos a la raiz
+        texto5.grid(row=0,column=0)          
+        video5 = tk.Label(video5frame) # AÑadimos el video3 a la raiz
+        video5.grid(row=1,column=0)
+
+        video6frame = tk.Frame(self.root)
+        video6frame.grid(row=1, column=2)
+        texto6 = tk.Label(video6frame, text="Dilatación") # Creamos un texto y lo añadimos a la raiz
+        texto6.grid(row=0,column=0)              
+        video6 = tk.Label(video6frame) # AÑadimos el video3 a la raiz
+        video6.grid(row=1,column=0)
 
         # Definimos todos los sliders y los seteamos con el valor de las variables globales por defecto
-        self.h_min = tk.Scale(self.root, from_=0, to=179, orient=tk.HORIZONTAL)
+        hsvframe = tk.LabelFrame(self.root,text = "HSV")
+        hsvframe.grid(row=8, column=0)
+        
+        
+        self.h_min = tk.Scale(hsvframe, from_=0, to=179, orient=tk.HORIZONTAL)
         self.h_min.set(h_min_global)
-        label_1 = tk.Label(self.root, text="h_min")
+        label_1 = tk.Label(hsvframe, text="h_min")
         label_1.grid(row=8, column=0)
         self.h_min.grid(row=8, column=1)
         
-        self.h_max = tk.Scale(self.root, from_=0, to=179, orient=tk.HORIZONTAL)
+        self.h_max = tk.Scale(hsvframe, from_=0, to=179, orient=tk.HORIZONTAL)
         self.h_max.set(h_max_global)
-        label_2 = tk.Label(self.root, text="h_max")
+        label_2 = tk.Label(hsvframe, text="h_max")
         label_2.grid(row=9, column=0)
         self.h_max.grid(row=9, column=1)        
         
-        self.s_min = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.s_min = tk.Scale(hsvframe, from_=0, to=255, orient=tk.HORIZONTAL)
         self.s_min.set(s_min_global)
-        label_3 = tk.Label(self.root, text="s_min")
+        label_3 = tk.Label(hsvframe, text="s_min")
         label_3.grid(row=10, column=0)
         self.s_min.grid(row=10, column=1)
         
-        self.s_max = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.s_max = tk.Scale(hsvframe, from_=0, to=255, orient=tk.HORIZONTAL)
         self.s_max.set(s_max_global)
-        label_4 = tk.Label(self.root, text="s_max")
+        label_4 = tk.Label(hsvframe, text="s_max")
         label_4.grid(row=11, column=0)
         self.s_max.grid(row=11, column=1)        
         
-        self.v_min = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.v_min = tk.Scale(hsvframe, from_=0, to=255, orient=tk.HORIZONTAL)
         self.v_min.set(v_min_global)
-        label_5 = tk.Label(self.root, text="v_min")
+        label_5 = tk.Label(hsvframe, text="v_min")
         label_5.grid(row=12, column=0)
         self.v_min.grid(row=12, column=1)        
         
-        self.v_max = tk.Scale(self.root, from_=0, to=255, orient=tk.HORIZONTAL)
+        self.v_max = tk.Scale(hsvframe, from_=0, to=255, orient=tk.HORIZONTAL)
         self.v_max.set(v_max_global)
-        label_6 = tk.Label(self.root, text="v_max")
+        label_6 = tk.Label(hsvframe, text="v_max")
         label_6.grid(row=13, column=0)
         self.v_max.grid(row=13, column=1)
         
         #sliders erosion dilatacion y blur
-        self.FMSize_B = tk.Scale(self.root, from_=1, to=20, orient=tk.HORIZONTAL)
-        self.FMSize_B.set(FMSize[0])
-        label_7 = tk.Label(self.root, text="FMSize")
+        pruebasframe = tk.LabelFrame(self.root,text = "Pruebas")
+        pruebasframe.grid(row=8, column=1)
+        
+        #self.FMSize_B = tk.Scale(pruebasframe, from_=1, to=20, orient=tk.HORIZONTAL)
+        #self.FMSize_B.set(FMSize[0])
+        label_7 = tk.Label(pruebasframe, text="FMSize")
         label_7.grid(row=15, column=0)
-        self.FMSize_B.grid(row=15, column=1)
+#        self.FMSize_B.grid(row=15, column=1)
+        global FMSize 
+        global EKSize
+        global EIteraciones
+        global DKSize 
+        global DIteraciones
 
-        self.EKSize_B = tk.Scale(self.root, from_=0, to=20, orient=tk.HORIZONTAL)
-        self.EKSize_B.set(EKSize[0])
-        label_8 = tk.Label(self.root, text="EKSize")
+#        EKSize_B3 = tk.Button(EKSizeframe, text='(3,3)',command=self.cerrarVentana)
+ #       EKSize_B3.grid(row=0,column=0)
+  #      EKSize_B5 = tk.Button(EKSizeframe, text='(5,5)',command=self.cerrarVentana)
+   #     EKSize_B5.grid(row=0,column=1)
+        FMSizeframe = tk.Frame(pruebasframe)
+        FMSizeframe.grid(row=15, column=1)        
+        self.FMSize_valor = tk.IntVar()
+        self.FMSize_valor.set(FMSize[0])
+        tk.Radiobutton(FMSizeframe, text="(3,3)", variable=self.FMSize_valor,value=3, command=self.seleccionar).grid(row=0,column=0)
+        tk.Radiobutton(FMSizeframe, text="(5,5)", variable=self.FMSize_valor,value=5, command=self.seleccionar).grid(row=0,column=1)
+        tk.Radiobutton(FMSizeframe, text="(9,9)", variable=self.FMSize_valor,value=9, command=self.seleccionar).grid(row=0,column=2)
+        
+        #self.EKSize_B = tk.Scale(pruebasframe, from_=0, to=20, orient=tk.HORIZONTAL)
+        #self.EKSize_B.set(EKSize[0])
+        label_8 = tk.Label(pruebasframe, text="EKSize")
         label_8.grid(row=16, column=0)
-        self.EKSize_B.grid(row=16, column=1)
-
-        self.EIteraciones_B = tk.Scale(self.root, from_=0, to=20, orient=tk.HORIZONTAL)
+        #self.EKSize_B.grid(row=16, column=1)
+        EKSizeframe = tk.Frame(pruebasframe)
+        EKSizeframe.grid(row=16, column=1)        
+        self.EKSize_valor = tk.IntVar()
+        self.EKSize_valor.set(EKSize[0])
+        tk.Radiobutton(EKSizeframe, text="(3,3)", variable=self.EKSize_valor,value=3, command=self.seleccionar).grid(row=0,column=0)
+        tk.Radiobutton(EKSizeframe, text="(5,5)", variable=self.EKSize_valor,value=5, command=self.seleccionar).grid(row=0,column=1)
+        tk.Radiobutton(EKSizeframe, text="(9,9)", variable=self.EKSize_valor,value=9, command=self.seleccionar).grid(row=0,column=2)
+        
+        self.EIteraciones_B = tk.Scale(pruebasframe, from_=0, to=20, orient=tk.HORIZONTAL)
         self.EIteraciones_B.set(EIteraciones)
-        label_9 = tk.Label(self.root, text="EIteraciones")
+        label_9 = tk.Label(pruebasframe, text="EIteraciones")
         label_9.grid(row=17, column=0)
         self.EIteraciones_B.grid(row=17, column=1)
 
-        self.DKSize_B = tk.Scale(self.root, from_=0, to=20, orient=tk.HORIZONTAL)
-        self.DKSize_B.set(DKSize[0])
-        label_10 = tk.Label(self.root, text="DKSize")
+        #self.DKSize_B = tk.Scale(pruebasframe, from_=0, to=20, orient=tk.HORIZONTAL)
+        #self.DKSize_B.set(DKSize[0])
+        label_10 = tk.Label(pruebasframe, text="DKSize")
         label_10.grid(row=18, column=0)
-        self.DKSize_B.grid(row=18, column=1)
-
-        self.DIteraciones_B = tk.Scale(self.root, from_=0, to=20, orient=tk.HORIZONTAL)
+        #self.DKSize_B.grid(row=18, column=1)
+        
+        DKSizeframe = tk.Frame(pruebasframe)
+        DKSizeframe.grid(row=18, column=1)        
+        self.DKSize_valor = tk.IntVar()
+        self.DKSize_valor.set(DKSize[0])
+        tk.Radiobutton(DKSizeframe, text="(3,3)", variable=self.DKSize_valor,value=3, command=self.seleccionar).grid(row=0,column=0)
+        tk.Radiobutton(DKSizeframe, text="(5,5)", variable=self.DKSize_valor,value=5, command=self.seleccionar).grid(row=0,column=1)
+        tk.Radiobutton(DKSizeframe, text="(9,9)", variable=self.DKSize_valor,value=9, command=self.seleccionar).grid(row=0,column=2)
+ 
+        self.DIteraciones_B = tk.Scale(pruebasframe, from_=0, to=20, orient=tk.HORIZONTAL)
         self.DIteraciones_B.set(DIteraciones)
-        label_11 = tk.Label(self.root, text="DIteraciones")
+        label_11 = tk.Label(pruebasframe, text="DIteraciones")
         label_11.grid(row=19, column=0)
         self.DIteraciones_B.grid(row=19, column=1)        
         
@@ -268,7 +358,7 @@ class skinfilterGUI():
         imagenSkinFilter = imagenSkinFilter.resize((68,68), Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
         imagenSkinFilterRedimensionada = ImageTk.PhotoImage(imagenSkinFilter)
         bclose = tk.Button(self.root, text='volver',image=imagenSkinFilterRedimensionada ,command=self.cerrarVentana)
-        bclose.grid(row=10,column=2,rowspan=2)
+        bclose.grid(row=8,column=2,rowspan=2)
 
         def on_closing():# Función para cerrar Tkinter y soltar la cámara
             print("closing")
@@ -283,14 +373,34 @@ class skinfilterGUI():
   
             _, img = cam.read()
             img = cv2.flip(img, 1)
+            #self.root.winfo_width()
+            #self.root.winfo_height()
+            #escala = (452,339)
+            #img = img.resize((452,339), Image.ANTIALIAS)
+            scale_percent_width = 60 * self.root.winfo_width()/1280# percent of original size
+            scale_percent_height = 60 * self.root.winfo_height()/720# percent of original size
+            scale_percent_width = scale_percent_width if scale_percent_width>60 else 60
+            scale_percent_height =  scale_percent_height if scale_percent_height>60 else 60
+            width = int(img.shape[1] * scale_percent_width / 100)
+            height = int(img.shape[0] * scale_percent_height / 100)
+            dim = (width, height)
+            # resize image
+            img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
             img1 = Image.fromarray(img)
+            
             imgtk1 = ImageTk.PhotoImage(image=img1)
             video1.imgtk = imgtk1
             video1.configure(image=imgtk1) 
+
             
             imgHsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
             
-
+            global h_min_global  
+            global h_max_global
+            global s_min_global 
+            global s_max_global 
+            global v_min_global 
+            global v_max_global 
             h_min_global = self.h_min.get() # Almacenamos el valor de los sliders en las variables globales
             h_max_global = self.h_max.get()
             s_min_global = self.s_min.get()
@@ -298,12 +408,16 @@ class skinfilterGUI():
             v_min_global = self.v_min.get()
             v_max_global = self.v_max.get()
             
+            global FMSize 
+            global EKSize
+            global EIteraciones
+            global DKSize 
+            global DIteraciones
 
-
-            FMSize = (self.FMSize_B.get(),self.FMSize_B.get())
-            EKSize = (self.EKSize_B.get(),self.EKSize_B.get())
+            #FMSize = (self.FMSize_B.get(),self.FMSize_B.get())
+            #EKSize = (self.EKSize_B.get(),self.EKSize_B.get())
             EIteraciones = self.EIteraciones_B.get() 
-            DKSize = (self.DKSize_B.get(),self.DKSize_B.get())
+            #DKSize = (self.DKSize_B.get(),self.DKSize_B.get())
             DIteraciones = self.DIteraciones_B.get()
         
             lower = np.array([h_min_global, s_min_global, v_min_global]) # Calculamos la máscara 
@@ -314,25 +428,24 @@ class skinfilterGUI():
   
             mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
             #escala = (640,480) 
-            escala = (452,339)
+            
             #escala = (320,240)
             cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
             img1 = Image.fromarray(cv2image)
             
-            img1 = img1.resize(escala, Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
+            #img1 = img1.resize(escala, Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
             imgtk1 = ImageTk.PhotoImage(image=img1)
             video1.imgtk = imgtk1
             video1.configure(image=imgtk1)
             
             img2 = Image.fromarray(mask)
-            img2 = img2.resize(escala, Image.ANTIALIAS)
+            #img2 = img2.resize((452,339), Image.ANTIALIAS)
             imgtk2 = ImageTk.PhotoImage(image=img2)
             video2.imgtk = imgtk2
             video2.configure(image=imgtk2)
             
             result = cv2.cvtColor(result, cv2.COLOR_BGR2RGBA)
             img3 = Image.fromarray(result)
-            img3 = img3.resize(escala, Image.ANTIALIAS)
             imgtk3 = ImageTk.PhotoImage(image=img3)
             video3.imgtk3 = imgtk3
             video3.configure(image=imgtk3)
@@ -340,7 +453,7 @@ class skinfilterGUI():
             filtro_media = cv2.blur(mask,FMSize)  
             filtro_media = cv2.cvtColor(filtro_media, cv2.COLOR_BGR2RGBA)
             img4 = Image.fromarray(filtro_media)
-            img4 = img4.resize(escala, Image.ANTIALIAS)
+            #img4 = img4.resize(escala, Image.ANTIALIAS)
             imgtk4 = ImageTk.PhotoImage(image=img4)
             video4.imgtk4 = imgtk4
             video4.configure(image=imgtk4)
@@ -349,7 +462,7 @@ class skinfilterGUI():
             filtro_erosion = cv2.erode(filtro_media, erosion_kernel, iterations = getEIteraciones())            
             filtro_erosion = cv2.cvtColor(filtro_erosion, cv2.COLOR_BGR2RGBA)
             img5 = Image.fromarray(filtro_erosion)
-            img5 = img5.resize(escala, Image.ANTIALIAS)
+            #img5 = img5.resize(escala, Image.ANTIALIAS)
             imgtk5 = ImageTk.PhotoImage(image=img5)
             video5.imgtk5 = imgtk5
             video5.configure(image=imgtk5)
@@ -358,7 +471,7 @@ class skinfilterGUI():
             filtro_dilatacion = cv2.erode(filtro_erosion, dilation_kernel, iterations = getDIteraciones()) 
             filtro_dilatacion = cv2.cvtColor(filtro_dilatacion, cv2.COLOR_BGR2RGBA)
             img6 = Image.fromarray(filtro_dilatacion)
-            img6 = img6.resize(escala, Image.ANTIALIAS)
+            #img6 = img6.resize(escala, Image.ANTIALIAS)
             imgtk6 = ImageTk.PhotoImage(image=img6)
             video6.imgtk6 = imgtk6
             video6.configure(image=imgtk6)
@@ -371,6 +484,13 @@ class skinfilterGUI():
     def cerrarVentana(self): # Nos devuelve al programa principal       
         self.root.destroy()  
         launchWindow()
+    def seleccionar(self):
+        global FMSize 
+        global EKSize
+        global DKSize 
+        FMSize = (self.FMSize_valor.get(),self.FMSize_valor.get())
+        EKSize = (self.EKSize_valor.get(),self.EKSize_valor.get())
+        DKSize = (self.DKSize_valor.get(),self.DKSize_valor.get())            
     
 def setPrediccionText(text): # Esta función actualiza la variable global para que cambie en Tkinter. Recibe un String
     global prediccionText
@@ -380,7 +500,20 @@ def setImagenReconocida(array): # Esta función actualiza la variable global par
     global imagenReconocidaImage
     imagenReconocidaImage = array
 
-
+def getSkinFilteredImage(frame): # Recibe un fotograma le aplica el skinfilter y devuelve la máscara
+    global h_min_global  
+    global h_max_global
+    global s_min_global 
+    global s_max_global 
+    global v_min_global 
+    global v_max_global 
+    #print("h_min_global "+h_min_global)
+    imgHsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    lower = np.array([h_min_global, s_min_global, v_min_global])
+    upper = np.array([h_max_global, s_max_global, v_max_global])
+    mask = cv2.inRange(imgHsv, lower, upper)
+    mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    return mask  
 ####################################################################################################################################
 
 # A partir de aquí lo que os interesa y podeis tocar

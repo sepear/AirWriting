@@ -17,6 +17,8 @@ s_max_global = 105  #
 v_min_global = 154  #
 v_max_global = 255  #
 
+
+
 # h_min_global = 0   # Parï¿½metros por defecto, una vez se hayan obtenido unos buenos hay que colocarlos aquï¿½
 # h_max_global = 53 #
 # s_min_global = 18   #
@@ -30,6 +32,8 @@ EKSize = (3, 3)  # idem
 EIteraciones = 1  # iter
 DKSize = (3, 3)  # tupla
 DIteraciones = 1  # iter
+
+
 
 cam = cv2.VideoCapture(0)  # Captura de la webcam
 _, frame = cam.read()#pillamos frame para tener el shape
@@ -78,11 +82,5 @@ def applyMask(img1, img2):
     dst = cv2.addWeighted(img1, 1, img2, 1, 0)
     return dst
 
-def getSkinFilteredImage(frame): # Recibe un fotograma le aplica el skinfilter y devuelve la máscara
-    imgHsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    lower = np.array([h_min_global, s_min_global, v_min_global])
-    upper = np.array([h_max_global, s_max_global, v_max_global])
-    mask = cv2.inRange(imgHsv, lower, upper)
-    mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-    return mask    
+  
 
