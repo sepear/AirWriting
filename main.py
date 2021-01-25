@@ -494,7 +494,7 @@ class skinfilterGUI():
             video5.configure(image=imgtk5)
 
             dilation_kernel = np.ones(getDKSize(), np.uint8)
-            filtro_dilatacion = cv2.erode(filtro_erosion, dilation_kernel, iterations=getDIteraciones())
+            filtro_dilatacion = cv2.dilate(filtro_erosion, dilation_kernel, iterations=getDIteraciones())
             filtro_dilatacion = cv2.cvtColor(filtro_dilatacion, cv2.COLOR_BGR2RGBA)
             img6 = Image.fromarray(filtro_dilatacion)
             # img6 = img6.resize(escala, Image.ANTIALIAS)
@@ -594,7 +594,7 @@ def main(fotograma):  # Este método main se ejecutará una vez por fotograma, a
 
     # iteraciones_dilation = getDIteraciones() #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones.
 
-    Dilation = cv2.erode(erosion, dilation_kernel,
+    Dilation = cv2.dilate(erosion, dilation_kernel,
                          iterations=getDIteraciones())  # iterations = iteraciones cuando la función esté hecha
 
     # Nota: iteraciones = 0 -> no hay Dilatación
@@ -605,6 +605,7 @@ def main(fotograma):  # Este método main se ejecutará una vez por fotograma, a
 
     # OJO CAMBIO TEMPORAL DE SERGIO EN EL QUE ME SALTO LO QUE NO SEA HSV PARA TESTEAR:anulado ahora
     imgray = cv2.cvtColor(Dilation, cv2.COLOR_BGR2GRAY)
+    #imgray=Dilation
     ret, thresh = cv2.threshold(imgray, 127, 255, 0)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # Asumimos que la mano es el contorno más grande, ya que estará en primer plano
