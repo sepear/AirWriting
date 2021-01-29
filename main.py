@@ -2,15 +2,15 @@
 """
 Created on Wed Dec 23 12:09:12 2020
 
-@author: kerorito
+@author: albersan
 """
-# Quizás os hace falta ejecutar lo siguiente
 # pip install imutils 
 # pip install PIL
 
-# Explicación de Tkinter para el que le interese...
+# Explicación básica de Tkinter
 # https://python-para-impacientes.blogspot.com/p/tutorial-de-tkinter.html
 
+#Librerías para la GUI y opencv
 import tkinter as tk
 import cv2
 from PIL import Image, ImageTk
@@ -28,14 +28,14 @@ RGB_R = 100
 RGB_G = 100
 RGB_B = 100
 global predicctionText
-prediccionText = "Predicción: inicio" # Variable para comunicarnos con Tkinter
+prediccionText = "Predicción: inicio" # Variable de texto para comunicarnos con Tkinter
 
 class AplicacionGUI():
     def __init__(self):
         self.root = tk.Tk()  # Creamos la raiz de tkinter
         self.root.title('Reconocimiento AirWriting')  # Ponemos título a la ventana
         self.root.geometry('1280x720')  # Definimos el tamaño
-        self.imageCounter = 0
+        self.imageCounter = 0 #Contador de fotogramas
         global imagenReconocidaImage
         imagenReconocidaImage = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
         imagenReconocidaImage = cv2.cvtColor(imagenReconocidaImage, cv2.COLOR_BGR2RGBA)
@@ -59,7 +59,7 @@ class AplicacionGUI():
 
         imagenGuardar = ImageTk.PhotoImage(Image.open("images/save.png"))  # Cargamos el icono de guardar
         bGuardar = tk.Button(buttonframe, text='Guardar', image=imagenGuardar,
-                             command=self.guardar)  # Creamos un botón con ola imagen anterior y que ejecutará la función correspondiente
+                             command=self.guardar)  # Creamos un botón con la imagen anterior y que ejecutará la función correspondiente
         bGuardar.grid(row=0, column=0)
 
         imagenReset = Image.open("images/reset.png")
@@ -76,6 +76,7 @@ class AplicacionGUI():
         bdebug = tk.Button(buttonframe, text='Debug', image=imagenDebugRedimensionada, command=self.fdebug)
         bdebug.grid(row=0, column=3)
 
+        #Creamos un frame para los sliders RGB
         rgbframe = tk.LabelFrame(self.root, text="RGB")
         rgbframe.grid(row=3, column=0)
 
@@ -125,9 +126,9 @@ class AplicacionGUI():
             cam.release()
             self.root.destroy()
 
-        self.root.protocol("WM_DELETE_WINDOW", on_closing)
+        self.root.protocol("WM_DELETE_WINDOW", on_closing) #Con esta función cerramos la ventana al pulsar la cruz
 
-        def show_frame():  # Esta función nos permite convertir la entrada de la webcam en imágenes válidas para tkinter
+        def show_frame():  # Esta función se ejecuta cada fotograma, se encarga de actualizar la pantalla y ejecutar el main
             _, frame = cam.read()
             frame = cv2.flip(frame, 1)
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
@@ -141,14 +142,14 @@ class AplicacionGUI():
             RGB_G = self.G_RGB.get()
             RGB_B = self.B_RGB.get()
 
-            main(
-                frame)  # CAMBIO HECHO POR SERGIO, COMO LUEGO SE LE HACEN COSAS INTERMEDIAS, EMJOR PASARLO EN BGR Y LUEGO YA AL FINAL SE PASA A RGBA
+            main(frame)  
 
-            if (debug):
+            if (debug): # Si estamos en debug se muestra el funcionamiento de la detección de la mano
                 imagen_dibujada = cv2image
             else:
                 imagen_dibujada = applyMask(imagenReconocidaImage, cv2image)
-
+                
+            #Reescalamos las imágenes según el tamaño de la ventana
             scale_percent_width = 85 * self.root.winfo_width() / 1280  # percent of original size
             scale_percent_height = 85 * self.root.winfo_height() / 720  # percent of original size
             scale_percent_width = scale_percent_width if scale_percent_width > 60 else 60
@@ -156,7 +157,6 @@ class AplicacionGUI():
             width = int(imagen_dibujada.shape[1] * scale_percent_width / 100)
             height = int(imagen_dibujada.shape[0] * scale_percent_height / 100)
             dim = (width, height)
-            # resize image
             imagen_dibujada = cv2.resize(imagen_dibujada, dim, interpolation=cv2.INTER_AREA)
             img = Image.fromarray(imagen_dibujada)
 
@@ -167,7 +167,6 @@ class AplicacionGUI():
             width = int(imagenReconocidaImage.shape[1] * scale_percent_width / 100)
             height = int(imagenReconocidaImage.shape[0] * scale_percent_height / 100)
             dim = (width, height)
-            # resize image
             imagen_dibujada = cv2.resize(imagenReconocidaImage, dim, interpolation=cv2.INTER_AREA)
             imgAnalizada = Image.fromarray(imagen_dibujada)
             imgAnalizada = ImageTk.PhotoImage(image=imgAnalizada)
@@ -177,7 +176,7 @@ class AplicacionGUI():
             global prediccionText  # Nos traemoos la variable global con el nuevo texto de la predicción y lo actualizamos
             prediccion.set(prediccionText)
 
-            self.root.after(10, show_frame)
+            self.root.after(10, show_frame) # Programamos Tkinter para ejecutar esta función de nuevo
 
         show_frame()  # Ejecutamos un frame
         self.root.mainloop()  # Bucle de Tkinter para generar la ventana y el contenido
@@ -213,7 +212,8 @@ class skinfilterGUI():
         self.root.geometry('1280x720')  # Definimos el tamaño
 
         self.frameCounter = 0
-
+        
+        #Ajustamos los tamaños y proporciones del grid
         self.root.columnconfigure(0, weight=1, minsize=240)
         self.root.columnconfigure(1, weight=1, minsize=240)
         self.root.columnconfigure(2, weight=1, minsize=240)
@@ -307,21 +307,16 @@ class skinfilterGUI():
         pruebasframe = tk.LabelFrame(self.root, text="Pruebas")
         pruebasframe.grid(row=8, column=1)
 
-        # self.FMSize_B = tk.Scale(pruebasframe, from_=1, to=20, orient=tk.HORIZONTAL)
-        # self.FMSize_B.set(FMSize[0])
+
+        #Sliders y botones para la sección pruebas
         label_7 = tk.Label(pruebasframe, text="FMSize")
-        label_7.grid(row=15, column=0)
-        #        self.FMSize_B.grid(row=15, column=1)
+        label_7.grid(row=15, column=0)        
         global FMSize
         global EKSize
         global EIteraciones
         global DKSize
         global DIteraciones
 
-        #        EKSize_B3 = tk.Button(EKSizeframe, text='(3,3)',command=self.cerrarVentana)
-        #       EKSize_B3.grid(row=0,column=0)
-        #      EKSize_B5 = tk.Button(EKSizeframe, text='(5,5)',command=self.cerrarVentana)
-        #     EKSize_B5.grid(row=0,column=1)
         FMSizeframe = tk.Frame(pruebasframe)
         FMSizeframe.grid(row=15, column=1)
         self.FMSize_valor = tk.IntVar()
@@ -332,12 +327,9 @@ class skinfilterGUI():
             row=0, column=1)
         tk.Radiobutton(FMSizeframe, text="(9,9)", variable=self.FMSize_valor, value=9, command=self.seleccionar).grid(
             row=0, column=2)
-
-        # self.EKSize_B = tk.Scale(pruebasframe, from_=0, to=20, orient=tk.HORIZONTAL)
-        # self.EKSize_B.set(EKSize[0])
+        
         label_8 = tk.Label(pruebasframe, text="EKSize")
         label_8.grid(row=16, column=0)
-        # self.EKSize_B.grid(row=16, column=1)
         EKSizeframe = tk.Frame(pruebasframe)
         EKSizeframe.grid(row=16, column=1)
         self.EKSize_valor = tk.IntVar()
@@ -355,12 +347,9 @@ class skinfilterGUI():
         label_9.grid(row=17, column=0)
         self.EIteraciones_B.grid(row=17, column=1)
 
-        # self.DKSize_B = tk.Scale(pruebasframe, from_=0, to=20, orient=tk.HORIZONTAL)
-        # self.DKSize_B.set(DKSize[0])
         label_10 = tk.Label(pruebasframe, text="DKSize")
         label_10.grid(row=18, column=0)
-        # self.DKSize_B.grid(row=18, column=1)
-
+        
         DKSizeframe = tk.Frame(pruebasframe)
         DKSizeframe.grid(row=18, column=1)
         self.DKSize_valor = tk.IntVar()
@@ -400,10 +389,7 @@ class skinfilterGUI():
 
             _, img = cam.read()
             img = cv2.flip(img, 1)
-            # self.root.winfo_width()
-            # self.root.winfo_height()
-            # escala = (452,339)
-            # img = img.resize((452,339), Image.ANTIALIAS)
+            #Reescalamos las imágenes de los videos
             scale_percent_width = 60 * self.root.winfo_width() / 1280  # percent of original size
             scale_percent_height = 60 * self.root.winfo_height() / 720  # percent of original size
             scale_percent_width = scale_percent_width if scale_percent_width > 60 else 60
@@ -411,7 +397,7 @@ class skinfilterGUI():
             width = int(img.shape[1] * scale_percent_width / 100)
             height = int(img.shape[0] * scale_percent_height / 100)
             dim = (width, height)
-            # resize image
+
             img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
             img1 = Image.fromarray(img)
 
@@ -421,6 +407,7 @@ class skinfilterGUI():
 
             imgHsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
+            #Actualizamos las variables globales con los nuevos valores
             global h_min_global
             global h_max_global
             global s_min_global
@@ -440,10 +427,7 @@ class skinfilterGUI():
             global DKSize
             global DIteraciones
 
-            # FMSize = (self.FMSize_B.get(),self.FMSize_B.get())
-            # EKSize = (self.EKSize_B.get(),self.EKSize_B.get())
             EIteraciones = self.EIteraciones_B.get()
-            # DKSize = (self.DKSize_B.get(),self.DKSize_B.get())
             DIteraciones = self.DIteraciones_B.get()
 
             lower = np.array([h_min_global, s_min_global, v_min_global])  # Calculamos la máscara
@@ -453,19 +437,15 @@ class skinfilterGUI():
             result = cv2.bitwise_and(img, img, mask=mask)
 
             mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-            # escala = (640,480)
 
-            # escala = (320,240)
             cv2image = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
             img1 = Image.fromarray(cv2image)
-
-            # img1 = img1.resize(escala, Image.ANTIALIAS) # Este icono nos hace falta redimensionarlo, al mismo tamaño que el icono anterior
+            
             imgtk1 = ImageTk.PhotoImage(image=img1)
             video1.imgtk = imgtk1
             video1.configure(image=imgtk1)
 
             img2 = Image.fromarray(mask)
-            # img2 = img2.resize((452,339), Image.ANTIALIAS)
             imgtk2 = ImageTk.PhotoImage(image=img2)
             video2.imgtk = imgtk2
             video2.configure(image=imgtk2)
@@ -479,7 +459,6 @@ class skinfilterGUI():
             filtro_media = cv2.blur(mask, FMSize)
             filtro_media = cv2.cvtColor(filtro_media, cv2.COLOR_BGR2RGBA)
             img4 = Image.fromarray(filtro_media)
-            # img4 = img4.resize(escala, Image.ANTIALIAS)
             imgtk4 = ImageTk.PhotoImage(image=img4)
             video4.imgtk4 = imgtk4
             video4.configure(image=imgtk4)
@@ -488,7 +467,6 @@ class skinfilterGUI():
             filtro_erosion = cv2.erode(filtro_media, erosion_kernel, iterations=getEIteraciones())
             filtro_erosion = cv2.cvtColor(filtro_erosion, cv2.COLOR_BGR2RGBA)
             img5 = Image.fromarray(filtro_erosion)
-            # img5 = img5.resize(escala, Image.ANTIALIAS)
             imgtk5 = ImageTk.PhotoImage(image=img5)
             video5.imgtk5 = imgtk5
             video5.configure(image=imgtk5)
@@ -497,7 +475,6 @@ class skinfilterGUI():
             filtro_dilatacion = cv2.dilate(filtro_erosion, dilation_kernel, iterations=getDIteraciones())
             filtro_dilatacion = cv2.cvtColor(filtro_dilatacion, cv2.COLOR_BGR2RGBA)
             img6 = Image.fromarray(filtro_dilatacion)
-            # img6 = img6.resize(escala, Image.ANTIALIAS)
             imgtk6 = ImageTk.PhotoImage(image=img6)
             video6.imgtk6 = imgtk6
             video6.configure(image=imgtk6)
@@ -511,7 +488,7 @@ class skinfilterGUI():
         self.root.destroy()
         launchWindow()
 
-    def seleccionar(self):
+    def seleccionar(self): #Al pulsar el botón de un kernel se asigna al correspondiente
         global FMSize
         global EKSize
         global DKSize
@@ -538,65 +515,46 @@ def getSkinFilteredImage(frame):  # Recibe un fotograma le aplica el skinfilter 
     global s_max_global
     global v_min_global
     global v_max_global
-    # print("h_min_global "+h_min_global)
     imgHsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower = np.array([h_min_global, s_min_global, v_min_global])
     upper = np.array([h_max_global, s_max_global, v_max_global])
     mask = cv2.inRange(imgHsv, lower, upper)
-    #mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-
     return mask
-
 
 ####################################################################################################################################
 
-# A partir de aquí lo que os interesa y podeis tocar
-
 def main(fotograma):  # Este método main se ejecutará una vez por fotograma, aquí está toda la lógica del programa
-    # El parámetro fotograma es, un fotograma xD hay que aplicar toda la lógica y funciones desde aquí
-    # getSkinFilteredImage(frame) con esta funcion nos devolverá el filtro aplicado al fotograma pasado
-    # NOTA IMPORTANTE : Para debuguear la imagen que esteis trabajando, usar la funcion setimagenreconocida, os la mostrará por pantalla aunque rompiendo la interfaz, hasta nuevo aviso será así
-    # print("Fotograma")
-    # a = media(fotograma)
-    # b = skinfilter(a)
-    # recortar(fotograma)
-    # prediccion(fotograma)
-    skinfiltered = getSkinFilteredImage(fotograma)  # ESTO HAY QUE ARREGLARLO PORQUE NO SALE COMO DEBERÍA
-    # setPrediccionText("-") # Ejemplo de como cambiar el texto de la predicción
-    # setImagenReconocida(np.zeros((40,40))*150) # Ejemplo de como cambiar la imagen de la predicción
+    # El parámetro fotograma es el fotograma actual de la cámara que vamos a procesar, hay que aplicar toda la lógica y funciones desde aquí
+ 
+    skinfiltered = getSkinFilteredImage(fotograma) # Aplicamos el skin filter al fotograma
 
     ############## Suavizado ###############
     global FMSize
     # filtro_media_size = FMSize;  #Función para que alberto haga la función y la enlace con los "botoncitos" los más comunes son (3,3) y (5,5)
 
-    filtro_media = cv2.blur(skinfiltered,
-                            FMSize)  # (3,3) sustituir por "filtro_media_size" cuando la función esté hecha
+    filtro_media = cv2.blur(skinfiltered,FMSize)  
 
     ############### Erosión #########################
 
     # erosion_kernel_size = getEKSize(); #Función para determinar el tamaño del kernel y alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
 
-    erosion_kernel = np.ones(getEKSize(),
-                             np.uint8)  # (3,3) sustituir por erosion_kernel_size cuando la función esté hecha)
+    erosion_kernel = np.ones(getEKSize(),np.uint8)
 
     # iteraciones_erosion = getEIteraciones() #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones.
 
-    erosion = cv2.erode(filtro_media, erosion_kernel,
-                        iterations=getEIteraciones())  # iterations = iteraciones cuando la función esté hecha
+    erosion = cv2.erode(filtro_media, erosion_kernel,iterations=getEIteraciones()) 
 
     # Nota: iteraciones = 0 -> no hay erosión
 
     ############### Dilatación ###################
 
-    # dilation_kernel_size = getDKSize(); #Función para determinar el tamaño del kernel y Alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
+    # dilation_kernel_size = getDKSize(); #Función para determinar el tamaño del kernel y enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
 
-    dilation_kernel = np.ones(getDKSize(),
-                              np.uint8)  # (3,3) sustituir por dilation_kernel_size cuando la función esté hecha)
+    dilation_kernel = np.ones(getDKSize(),np.uint8)  
 
     # iteraciones_dilation = getDIteraciones() #Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones.
 
-    Dilation = cv2.dilate(erosion, dilation_kernel,
-                         iterations=getDIteraciones())  # iterations = iteraciones cuando la función esté hecha
+    Dilation = cv2.dilate(erosion, dilation_kernel,iterations=getDIteraciones())
 
     # Nota: iteraciones = 0 -> no hay Dilatación
 
@@ -606,7 +564,6 @@ def main(fotograma):  # Este método main se ejecutará una vez por fotograma, a
     ret, Dilation = cv2.threshold(Dilation, 127, 255, cv2.THRESH_BINARY)
     Dilation = cv2.cvtColor(Dilation, cv2.COLOR_GRAY2BGR)
     imgray = cv2.cvtColor(Dilation, cv2.COLOR_BGR2GRAY)
-    #imgray=Dilation
     ret, thresh = cv2.threshold(imgray, 127, 255, 0)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # Asumimos que la mano es el contorno más grande, ya que estará en primer plano
@@ -722,28 +679,23 @@ def main(fotograma):  # Este método main se ejecutará una vez por fotograma, a
 
 def getEKSize():
     return EKSize
-
-
 # Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones en erosion.
 def getEIteraciones():
     return EIteraciones
-
-
 # Función para determinar el tamaño del kernel y Alberto lo enlace con los "botoncitos". Los más comunes son (3,3) y (5,5)
 def getDKSize():
     return DKSize
-
-
 # Función para que el usuario desde el panel de "botoncitos" pueda elegir el número de iteraciones en dilatacion.
 def getDIteraciones():
     return DIteraciones
 
 
+################################## Verdadero main ###########################
 def launchWindow(skinfilter=False):
     if (skinfilter):
-        mi_app = skinfilterGUI()  # Lanzamos la aplicación
+        mi_app = skinfilterGUI()  # Lanzamos la aplicación de configuración, cuando se pulse el botón volver se cerrará y llamará a launchwindow(false)
     else:
-        mi_app = AplicacionGUI()  # Lanzamos la aplicación
+        mi_app = AplicacionGUI()  # Lanzamos la aplicación principal, cuando se pulse el botón configuraciónn se cerrará y llamará a launchwindow(true)
 
 
 if __name__ == '__main__':  # Inicializamos la aplicación al estilo python
