@@ -12,10 +12,10 @@ imagenReconocidaImage = np.ones((40, 40)) * 150  # Variable para comunicarnos co
 
 h_min_global = 0  # Par�metros por defecto, una vez se hayan obtenido unos buenos hay que colocarlos aqu�
 h_max_global = 179  #
-s_min_global = 0  #
-s_max_global = 105  #
-v_min_global = 154  #
-v_max_global = 255  #
+s_min_global = 23  #
+s_max_global = 101  #
+v_min_global = 113  #
+v_max_global = 195  #
 
 
 
@@ -45,18 +45,60 @@ UMBRAL_UNIFICACION = 8  # SI DOS PUNTOS ESTÁN A MENOS DE 8 PIXELES DE DISTANCIA
 def masLejano(hand_hull_coordinates, centro):
     distancia_mejor = 0
     mejor = (-1, -1)
+    #condition = getOrientation(hand_hull_coordinates,centro[0],centro[1])
 
     for v in hand_hull_coordinates:
         x = v[0][0]
         y = v[0][1]
+
         distancia = abs(x - centro[0]) + abs(y - centro[1])
+        #if distancia > distancia_mejor and condition(x,y,centro[0],centro[1]):
         if distancia > distancia_mejor:
             distancia_mejor = distancia
             mejor = (x, y)
+            #print(mejor)
     return mejor
 
+def getOrientation(vertices,centerX,centerY):
+    majorX=0
+    minorX=0
 
-def unificaVertices(hand_hull_coordinates):
+    majorY=0
+    minorY=0
+
+    for vertex in vertices:
+        if vertex[0][0] > centerX:
+            majorX += 1
+        else:
+            minorX += 1
+        if vertex[0][1] > centerY:
+            majorY += 1
+        else:
+            minorY += 1
+
+    difX = abs(majorX - minorX)
+    difY = abs(majorY - minorY)
+
+    if difX > difY:
+        #vertical
+        if majorX > minorX:
+            print("down")
+            return lambda x, y, Xcent, Ycent: x > Xcent
+        else:
+            print("up")
+            return lambda x, y, Xcent, Ycent: x < Xcent
+
+    else:
+        #horizontal
+        if majorY > minorY:
+            print("right")
+            return lambda x, y, Xcent, Ycent: y > Ycent
+        else:
+            print("left")
+            return lambda x, y, Xcent, Ycent: y < Ycent
+
+
+def unificaVertices(hand_hull_coordinates):#depreciated (not used)
     for v1 in hand_hull_coordinates:
         x1 = v1[0][0]
         y1 = v1[0][1]
